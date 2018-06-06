@@ -353,8 +353,10 @@ namespace core {
 
     template <typename Stream, typename T>
     bool Unserialize(Stream &is, std::shared_ptr<T> &p) {
-        auto out = std::make_shared<T>(*new T());
-        if (!Unserialize(is, *out)) return false;
+        // TODO: Add Deserializer Constructor
+        T obj;
+        if (!Unserialize(is, obj)) return false;
+        auto out = std::make_shared<T>(obj);
         p = out;
         return true;
     }
