@@ -4,38 +4,6 @@
 
 namespace script {
 
-    static bool IsSignatureCompressable(const uint8_t *sig, size_t size) {
-        if (size < 9 || size > 73) return false;
-        if (sig[0] != 0x30) return false;
-        if (sig[1] != size - 3) return false;
-        if (sig[2] != 0x02) return false;
-
-        auto lenR = sig[3];
-        if (5 + lenR >= size) return false;
-        auto lenS = sig[5 + lenR];
-        if (lenR + lenS + 7 != size) return false;
-        auto sighash = sig[size - 1];
-
-        // sighash use 0 1 2 6 7 bits
-        if ((sighash & 0x38) != 0) return false;
-
-        // lenR use 3 4 5bits (29 -> 36)
-        if (lenR < 29 || lenR > 36) return false;
-        return true;
-    }
-
-    bool IsInputPubKey(const std::vector<uint8_t> &script) {
-        if (script.empty()) return false;
-        if ((size_t)script[0] + 1 != script.size()) return false;
-        
-        return IsSignatureCompressable(&script[1], script.size() - 1);
-    }
-
-    bool IsInputPubKeyHash(const std::vector<uint8_t> &script) {
-        if (script.empty()) return false;
-        // PUSH signature PUSH pubkey
-    }
-
     const static uint8_t PubKeyHashTemplate[] = {
         OP_DUP, OP_HASH160, 20, OP_EQUALVERIFY, OP_CHECKSIG,
     };

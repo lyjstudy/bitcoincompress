@@ -90,12 +90,6 @@ public:
 void logfunc(const char *txid, uint32_t index, script::Type type, const std::vector<uint8_t> &lock, const std::vector<uint8_t> *unlock) {
     if (type == script::Type::PubKey) {
         if (unlock != nullptr) {
-            if (!script::IsInputPubKey(*unlock)) {
-                printf("%s\n", txid);
-                printf("%s\n", core::HexFromBin(*unlock).c_str());
-                printf("%s\n", GetOpString(*unlock).c_str());
-                exit(-1);
-            }
         }
     } else if (type == script::Type::PubKeyHash) {
         if (unlock != nullptr) {

@@ -172,11 +172,11 @@ namespace core {
     // Generic Serialize
     template<typename Stream, typename Object>
     inline void Serialize(Stream &s, const Object &obj) {
-        obj.Serialize<Stream>(s);
+        obj.Serialize(s);
     }
     template<typename Stream, typename Object>
     inline bool Unserialize(Stream &s, Object &obj) {
-        return obj.Unserialize<Stream>(s);
+        return obj.Unserialize(s);
     }
 
     #define SERIALIZER_DECLARE_NUMBER_TYPE(type) \

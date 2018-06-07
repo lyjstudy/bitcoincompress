@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <functional>
 #include <block.h>
 #include <config.h>
 #include <logging.h>

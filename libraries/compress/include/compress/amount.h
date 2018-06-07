@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stdio.h>
 #include <stdint.h>
+#include <cmath>
 
 namespace compress {
 
@@ -35,7 +37,9 @@ namespace compress {
             base |= (e << 1);
             base |= 1;
 
-            if (base >= (uint64_t)amount) return (uint64_t)amount << 1;
+            uint64_t uncompress = (uint64_t)amount << 1;
+
+            if (base >= uncompress) return uncompress;
 
             return base;
         }
@@ -45,11 +49,11 @@ namespace compress {
             if ((comp & 1) == 0) return (int64_t)(comp >> 1);
 
             comp >>= 1;
-            unsigned int e = comp & EXPONENT_MASK;
+            unsigned int e = (comp & EXPONENT_MASK);
             comp >>= EXPONENT_BITS;
-            comp *= 10 ^ e;
+            comp *= std::pow(10, e);
 
-            return comp;
+            return (int64_t)comp;
         }
     };
 

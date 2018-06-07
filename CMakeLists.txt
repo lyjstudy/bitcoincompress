@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.5)
 
 project(BitcoinKeys)
 
-# Install openssl1.1.0 to /opt/openssl
+# Install openssl to /opt/openssl
+# git clone -b OpenSSL_1_1_0h https://github.com/openssl/openssl.git
+# cd openssl && mkdir build && cd build
+# ../config --prefix=/opt/openssl
+# make -j8 && sudo make install
 set(OPENSSL_CRYPTO_LIBRARY "/opt/openssl/lib/libcrypto.so")
 set(OPENSSL_CRYPTO_INCLUDES "/opt/openssl/include")
 
@@ -47,6 +51,5 @@ endif()
 
 add_subdirectory(libraries)
 add_subdirectory(program)
-# add_subdirectory(unittests)
 # add_subdirectory(tests)
 

@@ -31,6 +31,4 @@ namespace script {
 
     Type GetOutputType(const std::vector<uint8_t> &script);
 
-    bool IsInputPubKey(const std::vector<uint8_t> &script);
-    bool IsInputPubKeyHash(const std::vector<uint8_t> &script);
 }

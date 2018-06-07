@@ -6,15 +6,29 @@
 
 namespace compress {
 
-    
-    bool SignatureCompressible(const uint8_t *sig, size_t size);
-
     class Signature {
     protected:
-        // Support Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash]
-        // Support Out: [signash | ((R-length - 29) << 3) | 0x04] [R] [S]
-        static bool IsSupport(const uint8_t *sig, size_t size);
+        constexpr static uint8_t COMPRESSED_TAG = 0x04;
+        // bit 2 for compress tag
+        static bool IsCompressed(uint8_t firstByte) {
+            return (firstByte & COMPRESSED_TAG) == COMPRESSED_TAG;
+        }
+        // Sighash use 0 1 6 7bits
+        constexpr static uint8_t SIGHASH_MASK = 0x3C;
+        static bool IsSupportSighash(uint8_t sighash) {
+            return (sighash & SIGHASH_MASK) == 0;
+        }
+        // Rlen-29 use 3 4 5bits
+        constexpr static uint8_t LENR_MIN = 29;
+        constexpr static uint8_t LENR_MAX = 36;
+        static bool IsSupportLenR(uint8_t lenR) {
+            return LENR_MIN <= lenR && lenR <= LENR_MAX;
+        }
     public:
+        // Support Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash]
+        // Support Out: [sighash | ((R-length - 29) << 3) | 0x04] [R] [S]
+        // Unsupport Out: [0x00, data]
+        static bool IsSupport(const uint8_t *sig, size_t size);
         static std::vector<uint8_t> Compress(const uint8_t *sig, size_t size);
         static std::vector<uint8_t> Decompress(const uint8_t *data, size_t size);
     };
