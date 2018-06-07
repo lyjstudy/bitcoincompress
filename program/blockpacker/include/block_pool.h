@@ -11,9 +11,9 @@
 class BlockPool {
 protected:
     // Unknown Block
-    std::unordered_map<core::Uint256, core::Block *, core::Uint256Operator> mUnknownBlock;
+    std::unordered_map<core::Uint256, core::Block *, core::HashOperator<core::Uint256>> mUnknownBlock;
     // Block Hash => height
-    std::unordered_map<core::Uint256, int, core::Uint256Operator> mMapHeight;
+    std::unordered_map<core::Uint256, int, core::HashOperator<core::Uint256>> mMapHeight;
     // vector index = block height
     std::vector<std::set<core::Uint256>> mBlockTree;
 

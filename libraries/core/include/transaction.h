@@ -22,6 +22,13 @@ namespace core {
     public:
         OutPoint() : mTxId(), mIndex(-1) {}
         OutPoint(Uint256 txid, uint32_t idx) : mTxId(txid), mIndex(idx) {}
+
+        inline const Uint256 &TxId() {
+            return mTxId;
+        }
+        inline uint32_t TxIndex() {
+            return mIndex;
+        }
     };
 
     class TransactionIn {
@@ -75,11 +82,23 @@ namespace core {
         uint32_t mSequence;
     public:
         TransactionIn() : mSequence(SEQUENCE_FINAL) {}
-
+        TransactionIn(const TransactionIn &other) :
+            mPrevOut(other.mPrevOut), mUnlockScript(other.mUnlockScript), mSequence(other.mSequence)
+        {}
+        
         explicit TransactionIn(const OutPoint &prevout, const std::vector<uint8_t> &unlockScript,
                             uint32_t sequence = SEQUENCE_FINAL)
             : mPrevOut(prevout), mUnlockScript(unlockScript), mSequence(sequence) {}
 
+        inline const Uint256 &TxId() {
+            return mPrevOut.TxId();
+        }
+        inline uint32_t TxIndex() {
+            return mPrevOut.TxIndex();
+        }
+        inline const std::vector<uint8_t> &GetScript() {
+            return mUnlockScript;
+        }
     };
 
     class TransactionOut {
@@ -94,11 +113,16 @@ namespace core {
         int64_t mAmount;
         std::vector<uint8_t> mLockScript;
     public:
+        TransactionOut(const TransactionOut &other) :
+            mAmount(other.mAmount), mLockScript(other.mLockScript) {}
         TransactionOut() : mAmount(0) {}
         TransactionOut(int64_t amount, const std::vector<uint8_t> &lockScript)
             : mAmount(amount), mLockScript(lockScript) {}
         const std::vector<uint8_t> &GetScript() {
             return mLockScript;
+        }
+        int64_t Amount() {
+            return mAmount;
         }
     };
 
@@ -133,12 +157,27 @@ namespace core {
         uint32_t mLockTime;
     public:
         Transaction();
+        inline void AddInput(const TransactionIn &in) {
+            mInputs.push_back(in);
+        }
+        inline void AddOutput(const TransactionOut &out) {
+            mOutputs.push_back(out);
+        }
         inline int32_t Version() { return mVersion; }
         inline uint32_t LockTime() { return mLockTime; }
         inline size_t GetInputSize() { return mInputs.size(); }
         inline size_t GetOutputSize() { return mOutputs.size(); }
         inline const TransactionOut &GetOutput(size_t idx) {
             return mOutputs[idx];
+        }
+        inline const TransactionIn &GetInput(size_t idx) {
+            return mInputs[idx];
+        }
+
+        inline Uint256 GetHash() const {
+            DataStream stream(0, 0);
+            this->Serialize(stream);
+            return HashDoubleSha256(stream.Buffer());
         }
     };
 

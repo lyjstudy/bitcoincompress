@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+#include <vector>
+#include <string>
+
 /** Script opcodes */
 enum opcodetype {
     // push value
@@ -149,3 +153,7 @@ enum opcodetype {
 };
 
 const char *GetOpName(opcodetype opcode);
+
+std::string GetOpString(const std::vector<uint8_t> &codes);
+
+

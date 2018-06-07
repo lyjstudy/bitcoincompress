@@ -41,7 +41,7 @@ protected:
     template<typename T1, typename T2, typename T3>
     void addHistory(T3 &history, T1 first, T2 second) {
         if (history.empty() || history.back().second != second) {
-            history.push_back(std::make_pair(first, second));
+            // history.push_back(std::make_pair(first, second));
         }
     }
 public:

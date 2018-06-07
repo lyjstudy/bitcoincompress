@@ -49,7 +49,6 @@ void BlockPool::AddBlock(core::Block *blk) {
     ));
 }
 
-
 bool BlockPool::_writeCompress(core::Block *blk, int height) {
 
     mBlockInfo.AddBlock((uint32_t)height, blk);
@@ -66,10 +65,15 @@ bool BlockPool::_writeCompress(core::Block *blk, int height) {
             auto out = tx->GetOutput(j);
             switch (script::GetOutputType(out.GetScript())) {
                 case script::Type::OpReturn:
-                    printf("OpReturn: %s(%d, %d)\n%s\n", hashStr.c_str(), (int)i, (int)j, core::HexFromBin(out.GetScript()).c_str());
+                    //printf("OpReturn: %s(%d, %d)\n%s\n%s\n", hashStr.c_str(), (int)i, (int)j, 
+                    //    GetOpString(out.GetScript()).c_str(),
+                    //    core::HexFromBin(out.GetScript()).c_str());
                     break;
                 case script::Type::NonStandard:
-                    printf("NonStandard: %s(%d, %d)\n%s\n", hashStr.c_str(), (int)i, (int)j, core::HexFromBin(out.GetScript()).c_str());
+                    if (out.Amount() > 0)
+                    fprintf(stderr, "NonStandard: %s(%d) %ld\n%s\n%s\n", tx->GetHash().GetHex().c_str(), (int)j, out.Amount(),
+                        GetOpString(out.GetScript()).c_str(),
+                        core::HexFromBin(out.GetScript()).c_str());
                     break;
                 default:
                     break;

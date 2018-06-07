@@ -10,12 +10,15 @@ namespace script {
         NonStandard,
 
         // lock: PUSH(33=>65) OP_CHECKSIG
+        // unlock: PUSH(signature)
         PubKey,
 
         // lock: OP_DUP OP_HASH160 PUSH(20) OP_EQUALVERIFY OP_CHECKSIG
+        // unlock: PUSH(signature) PUSH(33=>65)
         PubKeyHash,
 
         // lock: OP_HASH160 PUSH(20) OP_EQUAL
+        // unlock: PUSH(script)
         ScriptHash,
 
         // lock: n(1=>3) PUSH(33=>65)... m(n=>16) OP_CHECKMULTISIG
@@ -28,4 +31,6 @@ namespace script {
 
     Type GetOutputType(const std::vector<uint8_t> &script);
 
+    bool IsInputPubKey(const std::vector<uint8_t> &script);
+    bool IsInputPubKeyHash(const std::vector<uint8_t> &script);
 }

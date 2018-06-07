@@ -25,6 +25,14 @@ namespace core {
         uint32_t mBits;
         uint32_t mNonce;
     public:
+        BlockHeader(const BlockHeader &other)
+            : mVersion(other.mVersion),
+            mHashPrevBlock(other.mHashPrevBlock),
+            mMerkleRoot(other.mMerkleRoot),
+            mTime(other.mTime),
+            mBits(other.mBits),
+            mNonce(other.mNonce)
+        {}
         BlockHeader() { SetNull(); }
 
         inline int32_t Version() {
@@ -56,7 +64,9 @@ namespace core {
         inline bool IsNull() const { return (mBits == 0); }
 
         inline Uint256 GetHash() const {
-            return HashDoubleSha256((char *)this, 80);
+            DataStream stream(0, 0);
+            this->Serialize(stream);
+            return HashDoubleSha256(stream.Buffer());
         }
 
         inline int64_t GetBlockTime() const { return (int64_t)mTime; }
@@ -73,9 +83,10 @@ namespace core {
     protected:
         std::vector<TransactionRef> mTransactions;
     public:
+        Block(const Block &) = delete;
+        Block(Block &&) = delete;
         Block() { SetNull(); }
-        Block(const BlockHeader &header) {
-            *((BlockHeader *)this) = header;
+        Block(const BlockHeader &header) : BlockHeader(header) {
             mTransactions.clear();
         }
         void SetNull() {

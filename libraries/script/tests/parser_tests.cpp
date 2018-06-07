@@ -149,6 +149,7 @@ BOOST_AUTO_TEST_CASE(templa) {
 
         BOOST_CHECK(script::GetOutputType(script) == testData[i].type);
 
+        printf("%s\n", GetOpString(testData[i].script).c_str());
     }
 
 

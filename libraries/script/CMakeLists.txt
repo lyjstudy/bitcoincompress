@@ -3,6 +3,7 @@ add_library(script
     src/parser.cpp
     src/type.cpp
     src/opcode.cpp
+    src/signature.cpp
 )
 
 
