@@ -15,4 +15,10 @@ namespace core {
         if (data.empty()) return "";
         return HexFromBin(&data[0], data.size());
     }
+    inline std::vector<uint8_t> HexToBin(const std::string &hex) {
+        std::vector<uint8_t> ret;
+        ret.resize(hex.size() / 2 + 1);
+        ret.resize(HexToBin(hex.c_str(), &ret[0], ret.size()));
+        return ret;
+    }
 }

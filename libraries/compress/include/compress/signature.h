@@ -31,6 +31,19 @@ namespace compress {
         static bool IsSupport(const uint8_t *sig, size_t size);
         static std::vector<uint8_t> Compress(const uint8_t *sig, size_t size);
         static std::vector<uint8_t> Decompress(const uint8_t *data, size_t size);
+
+        inline static bool IsSupport(const std::vector<uint8_t> &sig) {
+            if (sig.empty()) return false;
+            return IsSupport(&sig[0], sig.size());
+        }
+        inline static std::vector<uint8_t> Compress(const std::vector<uint8_t> &sig) {
+            if (sig.empty()) return sig;
+            return Compress(&sig[0], sig.size());
+        }
+        inline static std::vector<uint8_t> Decompress(const std::vector<uint8_t> &sig) {
+            if (sig.empty()) return sig;
+            return Decompress(&sig[0], sig.size());
+        }
     };
 
 }

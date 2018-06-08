@@ -38,7 +38,7 @@ namespace compress {
         auto lenR = sig[3];
         auto R = &sig[4];
         auto lenS = sig[5 + lenR];
-        auto S = sig[6 + lenR];
+        auto S = &sig[6 + lenR];
         auto sighash = sig[size - 1];
 
         std::vector<uint8_t> ret;
@@ -57,11 +57,11 @@ namespace compress {
         if (!IsCompressed(data[0])) return std::vector<uint8_t>(data + 1, data + size - 1);
         
         uint8_t sighash = data[0] & (~SIGHASH_MASK);
-        uint8_t lenR = (data[0] >> 3) & 0x07;
+        uint8_t lenR = ((data[0] >> 3) & 0x07) + LENR_MIN;
 
         // Bad Format
         if (!IsSupportLenR(lenR)) return std::vector<uint8_t>();
-        if ((size_t)lenR + 1 < size) return std::vector<uint8_t>();
+        if ((size_t)lenR + 1 > size) return std::vector<uint8_t>();
 
         uint8_t lenS = size - lenR - 1;
         auto R = &data[1];
@@ -72,6 +72,7 @@ namespace compress {
         ret.push_back(0x02);
         ret.push_back(lenR);
         ret.insert(ret.end(), R, R + lenR);
+        ret.push_back(0x02);
         ret.push_back(lenS);
         if (lenS > 0) ret.insert(ret.end(), S, S + lenS);
         ret.push_back(sighash);

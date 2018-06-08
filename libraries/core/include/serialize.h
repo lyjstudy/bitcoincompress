@@ -24,8 +24,8 @@ namespace core {
     inline float SwapBytes(const float value) { return value; }
     inline double SwapBytes(const double value) { return value; }
 
-    template<typename T>
-    inline T MemAs(const uint8_t *buf) {
+    template<typename T, typename T2 = uint8_t>
+    inline T MemAs(const T2 *buf) {
         return SwapBytes(*(T *)buf);
     }
 
