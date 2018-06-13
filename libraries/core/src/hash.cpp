@@ -64,4 +64,15 @@ namespace core {
         }
         return hash;
     }
+
+    Uint160 HashShaRipemd160(const char *mem, size_t size) {
+        Uint160 hash;
+        char shaBuffer[32];
+        if (!CalcHash<EVP_sha256>(mem, size, (unsigned char *)shaBuffer)) {
+            hash.SetZero();
+        } else if (!CalcHash<EVP_ripemd160>(shaBuffer, sizeof(shaBuffer), hash.begin())) {
+            hash.SetZero();
+        }
+        return hash;
+    }
 }

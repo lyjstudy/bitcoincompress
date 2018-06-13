@@ -1,3 +1,3 @@
 
-add_subdirectory(blockpacker)
-add_subdirectory(blockscan)
+#add_subdirectory(blockpacker)
+#add_subdirectory(blockscan)

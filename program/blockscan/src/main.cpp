@@ -67,8 +67,8 @@ public:
                 auto type = script::GetOutputType(out.GetScript());
                 switch (type) {
                     // case script::Type::PubKey:
-                    case script::Type::PubKeyHash:
-                    // case script::Type::ScriptHash:
+                    // case script::Type::PubKeyHash:
+                    case script::Type::ScriptHash:
                     // case script::Type::MultiSig:
                     // case script::Type::NonStandard:
                         mPool.AddOutput(tx, (uint16_t)j, type, out.GetScript());
@@ -95,6 +95,23 @@ void logfunc(const char *txid, uint32_t index, script::Type type, const std::vec
         if (unlock != nullptr) {
             
         }
+    } else if (type == script::Type::ScriptHash) {
+        if (unlock != nullptr) {
+            std::vector<uint8_t> scriptop;
+            std::vector<std::vector<uint8_t>> scriptChild;
+            script::Parser::GetScriptTemplate(*unlock, scriptop, &scriptChild);
+            if (!scriptChild.empty()) {
+                //printf("%s\n", GetOpString(scriptChild.back()).c_str());
+                scriptop.clear();
+                script::Parser::GetScriptTemplate(scriptChild.back(), scriptop);
+                if (std::find(scriptop.begin(), scriptop.end(), OP_CHECKSEQUENCEVERIFY) != scriptop.end()) {
+                    printf("%s %d\n", txid, (int)index);
+                    printf("%s\n\n", GetOpString(*unlock).c_str());
+                    printf("%s\n\n\n\n", GetOpString(scriptChild.back()).c_str());
+                }
+            }
+            // printf("%s\n", core::HexFromBin(*unlock).c_str());
+        }
     }
 }
 
@@ -104,6 +121,8 @@ int main(int argc, char *argv[]) {
 
     OutputPool pool(logfunc);
 
+    loader.SetFilePos(1000, 0);
+
     for (size_t i = 0; i < 600000; i++) {
         if (i % 50000 == 0) {
             LOGI("processing: %d", (int)i);
@@ -112,7 +131,8 @@ int main(int argc, char *argv[]) {
         if (!loader.NextBlock([&]() {
             core::Block *blk = new core::Block();
             loader.ReadBlock(*blk);
-            pool.AddBlk(blk);
+            pool.ProcessBlk(blk);
+            delete blk;
         })) {
             break;
         }

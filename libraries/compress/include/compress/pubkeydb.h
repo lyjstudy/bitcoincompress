@@ -8,14 +8,16 @@ namespace compress {
 
     // uncompress_pubkey and hash
     // compress_pubkey and hash
+    constexpr uint64_t INVALID_INDEX = (uint64_t)-1;
     class PubKeyDB {
     public:
-        constexpr static uint64_t INVALID_INDEX = (uint64_t)-1;
+        enum class Type {
+            Uncompress,
+            UncompressHash,
+            Compress,
+            CompressHash,
+        };
 
-        constexpr static uint64_t UNCOMPRESS_TYPE = 0;
-        constexpr static uint64_t COMPRESS_TYPE = 1;
-        constexpr static uint64_t UNCOMPRESS_HASH_TYPE = 2;
-        constexpr static uint64_t COMPRESS_HASH_TYPE = 3;
     protected:
         leveldb::DB* mDB;
         uint64_t mCount;
@@ -31,7 +33,16 @@ namespace compress {
         void Close();
 
         uint64_t Add(const uint8_t *pubkey, size_t size);
-        uint64_t FindHash(const uint8_t *sha256, size_t size);
+        uint64_t FindHash(const uint8_t *hash, size_t size);
+
+        inline uint64_t Add(const std::vector<uint8_t> &pubkey) {
+            if (pubkey.empty()) return INVALID_INDEX;
+            return Add(&pubkey[0], pubkey.size());
+        }
+        inline uint64_t FindHash(const std::vector<uint8_t> &hash) {
+            if (hash.size() != 20) return INVALID_INDEX;
+            return FindHash(&hash[0], hash.size());
+        }
     };
 
 }

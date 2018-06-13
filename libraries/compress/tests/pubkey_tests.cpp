@@ -1,7 +1,7 @@
 #include <compress/pubkey.h>
 #include <boost/test/unit_test.hpp>
 #include <string>
-#include <hex.h>
+#include <bkbase/hex.h>
 
 using namespace compress;
 
@@ -17,15 +17,15 @@ BOOST_AUTO_TEST_CASE(base) {
     for (size_t i = 0; i < sizeof(goodPubkey) / sizeof(goodPubkey[0]); i++) {
 
         printf("pubkey: %s\n", goodPubkey[i].c_str());
-        auto pubkey = core::HexToBin(goodPubkey[i]);
+        auto pubkey = bkbase::HexToBin(goodPubkey[i]);
 
         auto compress = PubKey::Compress(pubkey);
-        printf("comress: %s\n", core::HexFromBin(compress).c_str());
+        printf("comress: %s\n", bkbase::HexFromBin(compress).c_str());
         auto uncompress = PubKey::Decompress(compress);
-        printf("uncompress: %s\n", core::HexFromBin(uncompress).c_str());
+        printf("uncompress: %s\n", bkbase::HexFromBin(uncompress).c_str());
 
         BOOST_CHECK(compress.size() < uncompress.size());
-        BOOST_CHECK_EQUAL(core::HexFromBin(pubkey), core::HexFromBin(uncompress));
+        BOOST_CHECK_EQUAL(bkbase::HexFromBin(pubkey), bkbase::HexFromBin(uncompress));
 
     }
 }

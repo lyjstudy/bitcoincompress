@@ -7,6 +7,7 @@
 #include <block_loader.h>
 #include <script/type.h>
 #include <script/opcode.h>
+#include <script/parser.h>
 
 class OutputKey {
 private:

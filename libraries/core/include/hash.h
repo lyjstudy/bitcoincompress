@@ -155,9 +155,14 @@ namespace core {
     Uint256 HashSha256(const char *mem, size_t size);
     Uint160 Ripemd160(const char *mem, size_t size);
     Uint256 HashDoubleSha256(const char *mem, size_t size);
+    Uint160 HashShaRipemd160(const char *mem, size_t size);
 
     inline Uint256 HashDoubleSha256(const std::vector<uint8_t> &buf) {
         if (buf.empty()) return Uint256();
         return HashDoubleSha256((const char *)&buf[0], buf.size());
+    }
+    inline Uint160 HashShaRipemd160(const std::vector<uint8_t> &buf) {
+        if (buf.empty()) return Uint160();
+        return HashShaRipemd160((const char *)&buf[0], buf.size());
     }
 }

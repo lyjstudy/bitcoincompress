@@ -6,8 +6,8 @@ add_library(compress
     src/pubkeydb.cpp
 )
 
-target_link_libraries(compress core)
-target_include_directories(compress PUBLIC core include)
+target_link_libraries(compress bkbase)
+target_include_directories(compress PUBLIC bkbase include)
 
 # compress unit tests
 if (BITCOINKEYS_BUILD_TESTS)
