@@ -14,8 +14,9 @@ namespace bkbase
 
 template<unsigned int BITS, typename Allocator = std::allocator<uint8_t>>
 class HashBase {
-protected:
+public:
     enum { WIDTH = BITS / 8 };
+protected:
     uint8_t *mDataPtr;
 
     static uint8_t ZERO_DATA[WIDTH];
@@ -25,25 +26,25 @@ public:
     HashBase()
         : mDataPtr(nullptr) {
     }
-    ~HashBase() {
-        if (mDataPtr != nullptr)
-            allocator.deallocate(mDataPtr, Size());
-    }
-    HashBase(const HashBase &other) {
-        if (other.mDataPtr == nullptr) {
-            mDataPtr = nullptr;
-        } else {
+    HashBase(const HashBase &other) : mDataPtr(nullptr) {
+        if (other.mDataPtr != nullptr) {
             mDataPtr = allocator.allocate(Size());
             memcpy(mDataPtr, other.mDataPtr, Size());
         }
     }
-    HashBase(HashBase &&other)  {
-        mDataPtr = other.mDataPtr;
+    HashBase(HashBase &&other) : mDataPtr(other.mDataPtr)  {
         other.mDataPtr = nullptr;
+    }
+    ~HashBase() {
+        if (mDataPtr != nullptr)
+            allocator.deallocate(mDataPtr, Size());
     }
     inline void SetZero() {
         if (mDataPtr != nullptr)
             memset(mDataPtr, 0, Size());
+    }
+    bool hasMemory() const {
+        return mDataPtr != nullptr;
     }
     bool IsZero() const {
         if (mDataPtr == nullptr) return true;
@@ -52,7 +53,6 @@ public:
             return value != 0;
         }) == false;
     }
-
     int Compare(const HashBase &other) const {
         if (IsZero())
             return other.IsZero() ? 0 : -1;
@@ -60,13 +60,19 @@ public:
             return 1;
         return memcmp(mDataPtr, other.mDataPtr, Size());
     }
-    inline std::string GetHex() const {
+    inline std::string GetReverseHex() const {
         if (mDataPtr == nullptr) {
             return HexFromReverseBin(ZERO_DATA, Size());
         }
         return HexFromReverseBin(mDataPtr, Size());
     }
-    void SetHex(const char *psz) {
+    inline std::string GetHex() const {
+        if (mDataPtr == nullptr) {
+            return HexFromBin(ZERO_DATA, Size());
+        }
+        return HexFromBin(mDataPtr, Size());
+    }
+    void SetReverseHex(const char *psz) {
         if (mDataPtr == nullptr) mDataPtr = allocator.allocate(Size());
         memset(mDataPtr, 0, Size());
         HexToReverseBin(psz, mDataPtr, Size());

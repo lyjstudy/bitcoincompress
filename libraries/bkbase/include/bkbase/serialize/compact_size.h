@@ -27,7 +27,6 @@ public:
             ::bkbase::Serialize(stream, (uint8_t)255);
             ::bkbase::Serialize(stream, (uint64_t)mNumber);
         }
-        return;
     }
     template<typename Stream>
     void Unserialize(Stream &stream) {
@@ -61,5 +60,18 @@ public:
         }
     }
 };
+
+template<typename Stream>
+inline void WriteCompactSize(Stream &ss, size_t value) {
+    ::bkbase::Serialize(ss, ::bkbase::CompactSize<size_t>(value));
+}
+
+template<typename Stream>
+inline size_t ReadCompactSize(Stream &ss) {
+    size_t value;
+    ::bkbase::CompactSize<size_t> compact(value);
+    ::bkbase::Unserialize(ss, compact);
+    return value;
+}
 
 } // bkbase

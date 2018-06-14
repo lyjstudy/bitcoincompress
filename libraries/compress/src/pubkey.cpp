@@ -30,14 +30,14 @@ namespace compress {
         std::vector<uint8_t> ret(pubkey, pubkey + 33);
 
         secp256k1_pubkey secppubkey;
-        if (!secp256k1_ec_pubkey_parse(crypto::ctx_secp256k1, &secppubkey, &ret[0], ret.size())) {
+        if (!secp256k1_ec_pubkey_parse(crypto::Secp256k1, &secppubkey, &ret[0], ret.size())) {
             BKERROR() << "secp256k1_ec_pubkey_parse failure";
             return std::vector<uint8_t>(pubkey, pubkey + size);
         }
 
         ret.resize(65);
         size_t publen = 65;
-        secp256k1_ec_pubkey_serialize(crypto::ctx_secp256k1, &ret[0], &publen, &secppubkey, SECP256K1_EC_UNCOMPRESSED);
+        secp256k1_ec_pubkey_serialize(crypto::Secp256k1, &ret[0], &publen, &secppubkey, SECP256K1_EC_UNCOMPRESSED);
 
         ret.resize(publen);
 

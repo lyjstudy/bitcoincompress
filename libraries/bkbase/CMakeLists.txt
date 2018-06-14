@@ -5,6 +5,7 @@ add_library(bkbase
     src/hex.cpp
     src/logging.cpp
     src/hash.cpp
+    src/crypto/context.cpp
 )
 
 target_link_libraries(bkbase ${BKBASE_LIBRARIES})

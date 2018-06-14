@@ -28,7 +28,7 @@ set(LEVELDB_INCLUDES "/opt/leveldb/include")
 # Install boost
 # curl -LO https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.bz2
 # tar xf boost_1_67_0.tar.bz2 && cd boost_1_67_0
-# ./bootstrap.sh --prefix=/opt/boost
+# ./bootstrap.sh --prefix=/opt/boost_1_67_0
 # sudo ./b2 install
 set(BOOST_ROOT "/opt/boost_1_67_0")
 set(Boost_NO_SYSTEM_PATHS ON)

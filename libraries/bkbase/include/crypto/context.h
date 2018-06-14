@@ -25,5 +25,5 @@ namespace crypto {
         }
     };
     
-    Secp256k1Context thread_local ctx_secp256k1;
+    extern Secp256k1Context thread_local Secp256k1;
 }

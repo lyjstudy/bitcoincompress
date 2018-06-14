@@ -5,4 +5,5 @@
 #include "serialize/shared_ptr.h"
 #include "serialize/compact_size.h"
 #include "serialize/varint.h"
+#include "serialize/vector.h"
 #include "serialize/class_macro.h"

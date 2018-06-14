@@ -69,19 +69,9 @@ BOOST_AUTO_TEST_CASE(base) {
     BOOST_CHECK(std::equal(buffer, buffer + sizeof(buffer), dataStream.Buffer().begin()));
 }
 
-template<typename T>
-void WriteCompactSize(::bkbase::StreamData &ss, T value) {
-    // ss << ::bkbase::CompactSize<T>(value);
-    ::bkbase::Serialize(ss, ::bkbase::CompactSize<T>(value));
-}
+using WriteCompactSize = bkbase::WriteCompactSize;
+using ReadCompactSize = bkbase::ReadCompactSize;
 
-size_t ReadCompactSize(::bkbase::StreamData &ss) {
-    size_t value;
-    ::bkbase::CompactSize<size_t> compact(value);
-    // ss >> compact;
-    ::bkbase::Unserialize(ss, compact);
-    return value;
-}
 BOOST_AUTO_TEST_CASE(compactsize) {
     ::bkbase::StreamData ss(0, 0);
     std::vector<char>::size_type i, j;
