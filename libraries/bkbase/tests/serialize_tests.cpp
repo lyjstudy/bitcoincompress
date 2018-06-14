@@ -69,36 +69,33 @@ BOOST_AUTO_TEST_CASE(base) {
     BOOST_CHECK(std::equal(buffer, buffer + sizeof(buffer), dataStream.Buffer().begin()));
 }
 
-using WriteCompactSize = bkbase::WriteCompactSize;
-using ReadCompactSize = bkbase::ReadCompactSize;
-
 BOOST_AUTO_TEST_CASE(compactsize) {
     ::bkbase::StreamData ss(0, 0);
     std::vector<char>::size_type i, j;
 
     for (i = 1; i <= bkbase::COMPACT_SIZE_MAX; i *= 2) {
-        WriteCompactSize(ss, i - 1);
-        WriteCompactSize(ss, i);
+        bkbase::WriteCompactSize(ss, i - 1);
+        bkbase::WriteCompactSize(ss, i);
     }
     for (i = 1; i <= bkbase::COMPACT_SIZE_MAX; i *= 2) {
-        j = ReadCompactSize(ss);
+        j = bkbase::ReadCompactSize(ss);
         BOOST_CHECK_MESSAGE((i - 1) == j,
                             "decoded:" << j << " expected:" << (i - 1));
-        j = ReadCompactSize(ss);
+        j = bkbase::ReadCompactSize(ss);
         BOOST_CHECK_MESSAGE(i == j, "decoded:" << j << " expected:" << i);
     }
 
-    WriteCompactSize(ss, bkbase::COMPACT_SIZE_MAX);
-    BOOST_CHECK_EQUAL(ReadCompactSize(ss), bkbase::COMPACT_SIZE_MAX);
+    bkbase::WriteCompactSize(ss, bkbase::COMPACT_SIZE_MAX);
+    BOOST_CHECK_EQUAL(bkbase::ReadCompactSize(ss), bkbase::COMPACT_SIZE_MAX);
 
-    WriteCompactSize(ss, bkbase::COMPACT_SIZE_MAX + 1);
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    bkbase::WriteCompactSize(ss, bkbase::COMPACT_SIZE_MAX + 1);
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
-    WriteCompactSize(ss, std::numeric_limits<int64_t>::max());
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    bkbase::WriteCompactSize(ss, std::numeric_limits<int64_t>::max());
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
-    WriteCompactSize(ss, std::numeric_limits<uint64_t>::max());
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    bkbase::WriteCompactSize(ss, std::numeric_limits<uint64_t>::max());
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
     struct {
         uint64_t value;
@@ -142,32 +139,32 @@ BOOST_AUTO_TEST_CASE(noncanonical) {
 
     // zero encoded with three bytes:
     ss.Write("\xfd\x00\x00", 3);
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
     // 0xfc encoded with three bytes:
     ss.Write("\xfd\xfc\x00", 3);
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
     // 0xfd encoded with three bytes is OK:
     ss.Write("\xfd\xfd\x00", 3);
-    n = ReadCompactSize(ss);
+    n = bkbase::ReadCompactSize(ss);
     BOOST_CHECK(n == 0xfd);
 
     // zero encoded with five bytes:
     ss.Write("\xfe\x00\x00\x00\x00", 5);
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
     // 0xffff encoded with five bytes:
     ss.Write("\xfe\xff\xff\x00\x00", 5);
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
     // zero encoded with nine bytes:
     ss.Write("\xff\x00\x00\x00\x00\x00\x00\x00\x00", 9);
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 
     // 0x01ffffff encoded with nine bytes:
     ss.Write("\xff\xff\xff\xff\x01\x00\x00\x00\x00", 9);
-    BOOST_CHECK_THROW(ReadCompactSize(ss), bkbase::SerializeException);
+    BOOST_CHECK_THROW(bkbase::ReadCompactSize(ss), bkbase::SerializeException);
 }
 
 BOOST_AUTO_TEST_CASE(varints) {

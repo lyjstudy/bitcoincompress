@@ -13,9 +13,9 @@ target_include_directories(compress PUBLIC bkbase include)
 if (BITCOINKEYS_BUILD_TESTS)
     bitcoinkeys_test_suite(compress
         tests/main.cpp
-#        tests/amount_tests.cpp
-#        tests/signature_tests.cpp
-#        tests/pubkey_tests.cpp
+        tests/amount_tests.cpp
+        tests/signature_tests.cpp
+        tests/pubkey_tests.cpp
         tests/pubkeydb_tests.cpp
     )
 endif (BITCOINKEYS_BUILD_TESTS)

@@ -1,6 +1,7 @@
+#include <algorithm>
+#include <functional>
 #include <script/type.h>
 #include <script/parser.h>
-#include <script/signature.h>
 
 namespace script {
 
@@ -15,13 +16,14 @@ namespace script {
         if (script.empty()) return Type::NonStandard;
 
         std::vector<uint8_t> scriptTemplate;
-        script::Parser::GetScriptTemplate(script, scriptTemplate);
+        if (script::Parser::GetTemplate(script, scriptTemplate) != 0)
+            return Type::NonStandard;
         if (scriptTemplate.empty()) return Type::NonStandard;
 
         uint8_t op = scriptTemplate[0];
 
-        // PubKey: PUSH(33=>65) OP_CHECKSIG
-        if (op >= 33 && op <= 65 && scriptTemplate.size() == 2 && scriptTemplate[1] == OP_CHECKSIG) {
+        // PubKey: PUSH(33, 65) OP_CHECKSIG
+        if ((op == 33 || op == 65) && scriptTemplate.size() == 2 && scriptTemplate[1] == OP_CHECKSIG) {
             return Type::PubKey;
         }
         // PubKeyHash: OP_DUP OP_HASH160 PUSH(20) OP_EQUALVERIFY OP_CHECKSIG
@@ -34,16 +36,16 @@ namespace script {
         }
         // OpReturn: OP_RETURN PUSH...
         if (op == OP_RETURN) {
-            bool isOpReturn = true;
-            for (size_t i = 1; i < scriptTemplate.size(); i++) {
-                if (scriptTemplate[i] > OP_16) {
-                    isOpReturn = false; // PushOnly
-                    break;
-                }
+            if (scriptTemplate.size() == 1) return Type::NonStandard;
+            if (std::find_if(scriptTemplate.begin() + 1, scriptTemplate.end(), 
+                [] (uint8_t val) {
+                    return val > OP_16;
+                }) != scriptTemplate.end()) {
+                return Type::NonStandard;
             }
-            if (isOpReturn) return Type::OpReturn;
+            return Type::OpReturn;
         }
-        // MultiSig: n(1=>3) PUSH(33=>65)... m(n=>16) OP_CHECKMULTISIG
+        // MultiSig: n(1=>3) PUSH(33, 65)... m(n=>16) OP_CHECKMULTISIG
         if (op >= OP_1 && op <= OP_3) {
             int n = (int)op - (int)OP_1 + 1;
             if (scriptTemplate.size() >= (size_t)n + 3 && scriptTemplate.back() == OP_CHECKMULTISIG) {
@@ -51,7 +53,7 @@ namespace script {
                 if (m >= n && m <= 16 && scriptTemplate.size() == (size_t)m + 3) {
                     bool isValidMultiSig = true;
                     for (int i = 1; i <= m; i++) {
-                        if (scriptTemplate[i] < 33 || scriptTemplate[i] > 65) {
+                        if (scriptTemplate[i] != 33 && scriptTemplate[i] != 65) {
                             isValidMultiSig = false;
                             break;
                         }

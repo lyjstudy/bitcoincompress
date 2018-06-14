@@ -11,16 +11,16 @@ set(OPENSSL_CRYPTO_INCLUDES "/opt/openssl/include")
 # git clone https://github.com/lyjstudy/secp256k1.git
 # cd secp256k1
 # ./autogen.sh
-# cd build
+# mkdir build && cd build
 # ../configure --prefix=/opt/secp256k1
 # make -j8 && sudo make install
 set(SECP256K1_LIBRARY "/opt/secp256k1/lib/libsecp256k1.so")
 set(SECP256K1_INCLUDES "/opt/secp256k1/include")
 
 # Install leveldb to /opt/leveldb
-# git clone https://github.com/lyjstudy/leveldb.git
+# git clone https://github.com/google/leveldb.git
 # cd leveldb && mkdir build && cd build
-# cmake .. -DCMAKE_INSTALL_PREFIX=/opt/leveldb -DBUILD_SHARED_LIBS
+# cmake .. -DCMAKE_INSTALL_PREFIX=/opt/leveldb -DBUILD_SHARED_LIBS=1
 # make -j8 && sudo make install
 set(LEVELDB_LIBRARY "/opt/leveldb/lib/libleveldb.so")
 set(LEVELDB_INCLUDES "/opt/leveldb/include")
@@ -47,11 +47,8 @@ find_package(Boost 1.67 REQUIRED COMPONENTS
     unit_test_framework
 )
 
-set(CORE_LIBRARIES pthread ${OPENSSL_CRYPTO_LIBRARY} ${SECP256K1_LIBRARY} ${LEVELDB_LIBRARY} ${Boost_LIBRARIES})
-set(CORE_INCLUDES ${OPENSSL_CRYPTO_INCLUDES} ${SECP256K1_INCLUDES} ${LEVELDB_INCLUDES} ${Boost_INCLUDE_DIRS})
-
-set(BKBASE_LIBRARIES ${CORE_LIBRARIES})
-set(BKBASE_INCLUDES ${CORE_INCLUDES})
+set(BKBASE_LIBRARIES pthread ${OPENSSL_CRYPTO_LIBRARY} ${SECP256K1_LIBRARY} ${LEVELDB_LIBRARY} ${Boost_LIBRARIES})
+set(BKBASE_INCLUDES ${OPENSSL_CRYPTO_INCLUDES} ${SECP256K1_INCLUDES} ${LEVELDB_INCLUDES} ${Boost_INCLUDE_DIRS})
 
 find_program(CCACHE ccache)
 if(CCACHE)

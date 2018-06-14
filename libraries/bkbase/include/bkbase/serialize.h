@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "serialize/core.h"
 #include "serialize/numeric.h"
 #include "serialize/shared_ptr.h"

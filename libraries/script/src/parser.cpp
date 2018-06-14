@@ -11,21 +11,21 @@ namespace script {
         if (data != nullptr) data->clear();
         if (!_hasBytes(1)) return false;
 
-        uint8_t opcode = mCodes[mPc++];
-        if (opcode <= OP_PUSHDATA4) {
+        opcodeRet = mCodes[mPc++];
+        if (opcodeRet <= OP_PUSHDATA4) {
             uint32_t size = 0;
-            if (opcode < OP_PUSHDATA1) {
-                size = opcode;
-            } else if (opcode == OP_PUSHDATA1) {
+            if (opcodeRet < OP_PUSHDATA1) {
+                size = opcodeRet;
+            } else if (opcodeRet == OP_PUSHDATA1) {
                 if (!_hasBytes(1)) return false;
                 size = mCodes[mPc++];
-            } else if (opcode == OP_PUSHDATA2) {
+            } else if (opcodeRet == OP_PUSHDATA2) {
                 if (!_hasBytes(2)) return false;
-                size = core::MemAs<uint16_t>(&mCodes[mPc]);
+                size = bkbase::ReadLE<uint16_t>(&mCodes[mPc]);
                 mPc += 2;
-            } else if (opcode == OP_PUSHDATA4) {
+            } else if (opcodeRet == OP_PUSHDATA4) {
                 if (!_hasBytes(4)) return false;
-                size = core::MemAs<uint32_t>(&mCodes[mPc]);
+                size = bkbase::ReadLE<uint32_t>(&mCodes[mPc]);
                 mPc += 4;
             }
             if (size != 0) {
@@ -34,11 +34,10 @@ namespace script {
                 mPc += size;
             }
         }
-        opcodeRet = opcode;
         return true;
     }
 
-    void Parser::GetScriptTemplate(const std::vector<uint8_t> &codes, std::vector<uint8_t> &temp, 
+    size_t Parser::GetTemplate(const std::vector<uint8_t> &codes, std::vector<uint8_t> &temp, 
                         std::vector<std::vector<uint8_t>> *pushData) {
         temp.clear();
         if (pushData != nullptr) pushData->clear();
@@ -57,5 +56,10 @@ namespace script {
                 temp.push_back(opcode);
             }
         }
+
+        if (opcode != OP_INVALIDOPCODE) {
+            return parser.mPc;
+        }
+        return 0;
     }
 }

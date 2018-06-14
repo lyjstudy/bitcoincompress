@@ -5,7 +5,7 @@
 #include <string>
 
 /** Script opcodes */
-enum opcodetype {
+enum {
     // push value
     OP_0 = 0x00,
     OP_FALSE = OP_0,
@@ -152,8 +152,6 @@ enum opcodetype {
     OP_INVALIDOPCODE = 0xff,
 };
 
-const char *GetOpName(opcodetype opcode);
-
-std::string GetOpString(const std::vector<uint8_t> &codes);
+const char *GetOpName(uint8_t opcode);
 
 
