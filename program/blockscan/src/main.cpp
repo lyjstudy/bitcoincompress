@@ -1,57 +1,54 @@
-#include <boost/thread.hpp>
-#include <bkbase/logging.h>
-#include <bkbase/exception.h>
-#include <bkbase/stream.h>
-#include <core/block.h>
-#include "block_file.h"
+#include "output_pool.h"
+#include "scan.h"
+#include <atomic>
 
-BlockFile *GLoader = nullptr;
 
-void pubkeyMain(std::string name) {
-    bkbase::LoggingThreadName(name);
-    BKLOGSCOPE("entry");
-
-    std::vector<uint8_t> blockBuffer;
-    bkbase::StreamVector stream(0, 0, blockBuffer);
-
-    core::Block block;
-    while (GLoader->NextBlock(blockBuffer)) {
-        try {
-            stream >> block;
-            // BKINFO() << block.CalcHash().GetReverseHex() << " : " << block.Transactions()[0]->CalcHash().GetReverseHex();
-            // 需要查找一下P2PK和MS和P2PKH的非标准输入有多少
-            // 需要查找一下P2SH子类型非标准有多少
-            break;
-        } catch (bkbase::Exception &ex) {
-            BKERROR() << boost::diagnostic_information(ex);
-        } catch (std::exception &ex) {
-            BKERROR() << ex.what();
-        } catch (...) {
-            BKERROR() << "Unknown Excpetion";
+class PubkeyScan : public OutputPool {
+public:
+    virtual bool IsUnspendable(const std::vector<uint8_t> &script, int64_t amount) {
+        if (amount <= 0) return true;
+        if (script.empty()) return true;
+        if (script[0] == OP_RETURN) return true;
+        return false;
+    }
+    virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) {
+    }
+    virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock) {
+        std::vector<std::vector<uint8_t>> address;
+        auto type = script::GetOutputType(lock, &address);
+        switch (type) {
+            case script::Type::PubKey:
+                // 地址是公钥
+                break;
+            case script::Type::PubKeyHash:
+                // 解锁脚本的最后一个PUSH是公钥
+                break;
+            case script::Type::ScriptHash:
+                // 解锁脚本的最后一个PUSH 解出来的类型 再继续分析
+                break;
+            case script::Type::MultiSig:
+                // 所有地址都是公钥
+                break;
+            default: // NonStandard Spended
+                // 
+                break;
         }
     }
+    // Main Thread
+    virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock) {
+    }
+    virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) {
+    }
+};
 
-    BKINFO() << name << " Exited";
-}
 
 int main(int argc, char *argv[]) {
     bkbase::LoggingInitialize(LOGCRITICAL, LOGTRACE);
     bkbase::LoggingThreadName("main");
+    BKLOGSCOPE("entry");
 
-    BlockFile blockFile("/home/liuyujun/.bitcoin/blocks");
+    Scan<PubkeyScan> scan("/home/liuyujun/.bitcoin/blocks");
 
-    GLoader = &blockFile;
-
-    boost::thread_group group;
-    for (size_t i = 0; i < boost::thread::hardware_concurrency() + 1; i++) {
-        std::stringstream ss;
-        std::string threadName;
-        ss << "pubkey";
-        ss << i;
-        ss >> threadName;
-
-        group.create_thread(boost::bind(pubkeyMain , threadName));
-    }
-    group.join_all();
+    scan.Start();
     return 0;
 }

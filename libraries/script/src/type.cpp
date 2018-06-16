@@ -12,11 +12,15 @@ namespace script {
         OP_HASH160, 20, OP_EQUAL,
     };
 
-    Type GetOutputType(const std::vector<uint8_t> &script) {
+    Type GetOutputType(const std::vector<uint8_t> &script, std::vector<std::vector<uint8_t>> *addrs) {
+
+        if (addrs != nullptr) addrs->clear();
+
         if (script.empty()) return Type::NonStandard;
 
         std::vector<uint8_t> scriptTemplate;
-        if (script::Parser::GetTemplate(script, scriptTemplate) != 0)
+        std::vector<std::vector<uint8_t>> stack;
+        if (script::Parser::GetTemplate(script, scriptTemplate, &stack) != 0)
             return Type::NonStandard;
         if (scriptTemplate.empty()) return Type::NonStandard;
 
@@ -24,14 +28,17 @@ namespace script {
 
         // PubKey: PUSH(33, 65) OP_CHECKSIG
         if ((op == 33 || op == 65) && scriptTemplate.size() == 2 && scriptTemplate[1] == OP_CHECKSIG) {
+            if (addrs != nullptr) addrs->push_back(std::move(stack.back()));
             return Type::PubKey;
         }
         // PubKeyHash: OP_DUP OP_HASH160 PUSH(20) OP_EQUALVERIFY OP_CHECKSIG
         if (scriptTemplate.size() == 5 && memcmp(&scriptTemplate[0], PubKeyHashTemplate, 5) == 0) {
+            if (addrs != nullptr) addrs->push_back(std::move(stack.back()));
             return Type::PubKeyHash;
         }
         // ScriptHash: OP_HASH160 PUSH(20) OP_EQUAL
         if (scriptTemplate.size() == 3 && memcmp(&scriptTemplate[0], ScriptHashTemplate, 3) == 0) {
+            if (addrs != nullptr) addrs->push_back(std::move(stack.back()));
             return Type::ScriptHash;
         }
         // OpReturn: OP_RETURN PUSH...
@@ -45,8 +52,8 @@ namespace script {
             }
             return Type::OpReturn;
         }
-        // MultiSig: n(1=>3) PUSH(33, 65)... m(n=>16) OP_CHECKMULTISIG
-        if (op >= OP_1 && op <= OP_3) {
+        // MultiSig: n(1=>16) PUSH(33, 65)... m(n=>16) OP_CHECKMULTISIG
+        if (op >= OP_1 && op <= OP_16) {
             int n = (int)op - (int)OP_1 + 1;
             if (scriptTemplate.size() >= (size_t)n + 3 && scriptTemplate.back() == OP_CHECKMULTISIG) {
                 int m = (int)scriptTemplate[scriptTemplate.size() - 2] - (int)OP_1 + 1;
@@ -57,6 +64,7 @@ namespace script {
                             isValidMultiSig = false;
                             break;
                         }
+                        if (addrs != nullptr) addrs->push_back(stack[i - 1]);
                     }
                     if (isValidMultiSig) {
                         return Type::MultiSig;
@@ -64,6 +72,7 @@ namespace script {
                 }
             }
         }
+        if (addrs != nullptr) addrs->clear();
 
         return Type::NonStandard;
     }

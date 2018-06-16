@@ -14,10 +14,14 @@ namespace script {
             return mPc + count <= mCodes.size();
         }
     public:
-        explicit Parser(const std::vector<uint8_t> &codes);
+        Parser();
+        Parser(const std::vector<uint8_t> &codes);
+        Parser(std::vector<uint8_t> &&codes);
+
+        void Reset(std::vector<uint8_t> &&codes);
+        void Reset(const std::vector<uint8_t> &codes);
 
         bool Fetch(uint8_t &opcodeRet, std::vector<uint8_t> *data = nullptr);
-
         // 0 ok
         // > 0 error position in codes
         static size_t GetTemplate(const std::vector<uint8_t> &codes, std::vector<uint8_t> &temp, 

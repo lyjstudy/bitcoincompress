@@ -1,4 +1,27 @@
 #include <script/opcode.h>
+#include <script/parser.h>
+#include <bkbase/hex.h>
+
+std::string GetOpString(const std::vector<uint8_t> &codes) {
+    std::string strCodes;	
+	
+    script::Parser parser(codes);	
+    char buffer[1024];	
+	
+    uint8_t op;	
+    std::vector<uint8_t> data;	
+    while (parser.Fetch(op, &data)) {	
+        if (op <= OP_PUSHDATA4) {	
+            // PUSHDATA(%d)(%s)	
+            snprintf(buffer, sizeof(buffer), "PUSHDATA(%d)[%s] ", (int)data.size(), bkbase::HexFromBin(data).c_str());	
+        } else {	
+            snprintf(buffer, sizeof(buffer), "%s ", GetOpName(op));	
+        }	
+        strCodes += buffer;	
+    }	
+	
+    return strCodes;	
+}
 
 const char *GetOpName(uint8_t opcode) {
     switch (opcode) {

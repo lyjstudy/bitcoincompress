@@ -104,7 +104,7 @@ public:
     inline int64_t Amount() const {
         return mAmount;
     }
-    inline const std::vector<uint8_t> &LockScript() {
+    inline const std::vector<uint8_t> &LockScript() const {
         return mLockScript;
     }
 };

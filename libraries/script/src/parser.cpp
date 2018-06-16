@@ -2,9 +2,26 @@
 
 namespace script {
 
+    Parser::Parser()
+        : mPc(0)
+    {}
+
     Parser::Parser(const std::vector<uint8_t> &codes)
         : mCodes(codes), mPc(0)
     {}
+
+    Parser::Parser(std::vector<uint8_t> &&codes)
+        : mCodes(codes), mPc(0)
+    {}
+
+    void Parser::Reset(std::vector<uint8_t> &&codes) {
+        mCodes = codes;
+        mPc = 0;
+    }
+    void Parser::Reset(const std::vector<uint8_t> &codes) {
+        mCodes = codes;
+        mPc = 0;
+    }
 
     bool Parser::Fetch(uint8_t &opcodeRet, std::vector<uint8_t> *data) {
         opcodeRet = OP_INVALIDOPCODE;

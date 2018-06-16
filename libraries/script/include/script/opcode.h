@@ -140,6 +140,12 @@ enum {
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
 
+    // loop
+    OP_DO = 0xba,
+    OP_WHILE = 0xbb,
+    OP_BREAK = 0xbc,
+    OP_CONTINUE = 0xbd,
+
     // The first op_code value after all defined opcodes
     FIRST_UNDEFINED_OP_VALUE,
 
@@ -154,4 +160,8 @@ enum {
 
 const char *GetOpName(uint8_t opcode);
 
+inline bool OpCodeIsCondition(uint8_t opcode) {
+    return opcode <= OP_IF && opcode >= OP_ENDIF;
+}
 
+std::string GetOpString(const std::vector<uint8_t> &codes);

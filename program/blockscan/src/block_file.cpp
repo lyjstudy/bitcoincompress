@@ -8,32 +8,63 @@ static std::string getFilename(int fileNumber) {
     return std::string(filename);
 }
 
+
+BlockLoader::BlockLoader(const char *path)
+    : mDirectory(path), mFileNumber(0), mReachEnd(false) {
+}
+
+bool BlockLoader::LoadNextFile(std::vector<uint8_t> &buffer) {
+    std::string nextFile = (mDirectory / getFilename(mFileNumber++)).string();
+    FILE *fp = fopen(nextFile.c_str(), "rb");
+    if (fp == nullptr) {
+        return false;
+    }
+    BKINFO() << "reading " << nextFile;
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
+    if (size <= 0) {
+        fclose(fp);
+        return false;
+    }
+    buffer.resize((size_t)size);
+    fseek(fp, 0, SEEK_SET);
+    fread(&buffer[0], buffer.size(), 1, fp);
+    fclose(fp);
+    return true;
+}
+
+void BlockLoader::LoadLoop() {
+    while (true) {
+        std::vector<uint8_t> buffer;
+        if (!LoadNextFile(buffer)) break;
+
+        while (IsFull()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        Push(std::move(buffer));
+    }
+    mReachEnd = true;
+}
+
+bool BlockLoader::GetBuffer(std::vector<uint8_t> &buf) {
+    while (IsEmpty()) {
+        if (mReachEnd) return false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    Pop(buf);
+    return true;
+}
+
 BlockFile::BlockFile(const char *blockDirectory)
-    : mBlockDirectory(blockDirectory), mFileNumber(0), mFilePosition(0), mIsEnded(false)
+    : mLoader(blockDirectory), mFilePosition(0)
 {
 }
 
 bool BlockFile::_NextBlock(std::vector<uint8_t> &blockData) {
-    while (!mIsEnded) {
+    while (true) {
         if (!hasBytes(1)) {
-            std::string nextFile = (mBlockDirectory / getFilename(mFileNumber++)).string();
-            BKINFO() << "reading " << nextFile;
-            FILE *fp = fopen(nextFile.c_str(), "rb");
-            if (fp == nullptr) {
-                mIsEnded = true;
-                break;
-            }
-            fseek(fp, 0, SEEK_END);
-            long size = ftell(fp);
-            if (size <= 0) {
-                mIsEnded = true;
-                fclose(fp);
-                break;
-            }
-            mFileBuffer.resize((size_t)size);
-            fseek(fp, 0, SEEK_SET);
-            fread(&mFileBuffer[0], mFileBuffer.size(), 1, fp);
-            fclose(fp);
+            if (!mLoader.GetBuffer(mFileBuffer)) break;
             mFilePosition = 0;
         }
 

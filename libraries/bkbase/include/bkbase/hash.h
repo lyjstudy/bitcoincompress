@@ -35,6 +35,10 @@ public:
     HashBase(HashBase &&other) : mDataPtr(other.mDataPtr)  {
         other.mDataPtr = nullptr;
     }
+    HashBase(const std::vector<uint8_t> &data)
+        : mDataPtr(allocator.allocate(Size())) {
+        SetData(data);
+    }
     ~HashBase() {
         if (mDataPtr != nullptr)
             allocator.deallocate(mDataPtr, Size());
@@ -81,7 +85,7 @@ public:
         if (mDataPtr == nullptr) mDataPtr = allocator.allocate(Size());
         memset(mDataPtr, 0, Size());
         if (!data.empty())
-            memcpy(mDataPtr, &data[0], std::min(data.size(), Size()));
+            memcpy(mDataPtr, &data[0], data.size() < Size() ? data.size() : Size());
     }
 
     friend inline bool operator==(const HashBase &a, const HashBase &b) {

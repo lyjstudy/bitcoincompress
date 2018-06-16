@@ -29,6 +29,6 @@ namespace script {
         OpReturn,
     };
 
-    Type GetOutputType(const std::vector<uint8_t> &script);
+    Type GetOutputType(const std::vector<uint8_t> &script, std::vector<std::vector<uint8_t>> *addrs = nullptr);
 
 }
