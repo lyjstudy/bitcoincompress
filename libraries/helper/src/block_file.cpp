@@ -1,6 +1,10 @@
+#include <chrono>
+
 #include <bkbase/endian.h>
 #include <bkbase/logging.h>
-#include "block_file.h"
+#include <helper/block_file.h>
+
+
 
 static std::string getFilename(int fileNumber) {
     char filename[32];
@@ -9,12 +13,15 @@ static std::string getFilename(int fileNumber) {
 }
 
 
+namespace helper {
+
 BlockLoader::BlockLoader(const char *path)
     : mDirectory(path), mFileNumber(0), mReachEnd(false) {
 }
 
 bool BlockLoader::LoadNextFile(std::vector<uint8_t> &buffer) {
     std::string nextFile = (mDirectory / getFilename(mFileNumber++)).string();
+    // if (mFileNumber == 2) return false;
     FILE *fp = fopen(nextFile.c_str(), "rb");
     if (fp == nullptr) {
         return false;
@@ -105,4 +112,6 @@ bool BlockFile::_NextBlock(std::vector<uint8_t> &blockData) {
         return true;
     }
     return false;
+}
+
 }

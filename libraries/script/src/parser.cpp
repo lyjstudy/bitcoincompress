@@ -66,7 +66,15 @@ namespace script {
         if (pushData != nullptr) {
             while (parser.Fetch(opcode, &data)) {
                 temp.push_back(opcode);
-                if (!data.empty()) pushData->push_back(std::move(data));
+                if (opcode <= OP_16) {
+                    if (opcode <= OP_PUSHDATA4) {
+                        pushData->push_back(std::move(data));
+                    } else if (opcode == OP_1NEGATE) {
+                        pushData->push_back({ 0x81 });
+                    } else {
+                        pushData->push_back({ (uint8_t)(opcode + 1 - OP_1) });
+                    }
+                }
             }
         } else {
             while (parser.Fetch(opcode)) {

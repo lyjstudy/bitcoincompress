@@ -37,7 +37,14 @@ public:
     }
     HashBase(const std::vector<uint8_t> &data)
         : mDataPtr(allocator.allocate(Size())) {
-        SetData(data);
+        memset(mDataPtr, 0, Size());
+        if (!data.empty())
+            memcpy(mDataPtr, &data[0], data.size() < Size() ? data.size() : Size());
+    }
+    HashBase(const void *ptr, size_t size)
+        : mDataPtr(allocator.allocate(Size())) {
+        memset(mDataPtr, 0, Size());
+        memcpy(mDataPtr, ptr, size < Size() ? size : Size());
     }
     ~HashBase() {
         if (mDataPtr != nullptr)

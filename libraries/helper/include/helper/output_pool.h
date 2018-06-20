@@ -5,17 +5,19 @@
 #include <unordered_map>
 #include <mutex>
 
+namespace helper {
+
 /*
     Output: txid index lockscript
     Input: txid index unlockscript
 */
-class OutputKey : public bkbase::HashBase<264> {
+class OutputKey : public bkbase::HashBase<256 + 16> {
 public:
-    using bkbase::HashBase<264>::HashBase;
+    using bkbase::HashBase<256 + 16>::HashBase;
     OutputKey(const bkbase::Hash256 &txid, uint16_t index) {
         mDataPtr = allocator.allocate(Size());
         bkbase::WriteLE<uint16_t>(mDataPtr, index);
-        memcpy(mDataPtr + sizeof(index), txid.begin(), txid.size());
+        memcpy(mDataPtr + sizeof(uint16_t), txid.begin(), txid.size());
     }
     inline uint16_t TxIndex() const {
         if (mDataPtr == nullptr) return 0;
@@ -23,9 +25,7 @@ public:
     }
     inline bkbase::Hash256 TxID() const {
         if (mDataPtr == nullptr) return bkbase::Hash256();
-        bkbase::Hash256 r;
-        memcpy(r.begin(), mDataPtr + sizeof(uint16_t), r.Size());
-        return std::move(r);
+        return bkbase::Hash256(mDataPtr + sizeof(uint16_t), Size() - sizeof(uint16_t));
     }
 };
 
@@ -111,7 +111,9 @@ public:
     virtual bool IsUnspendable(const std::vector<uint8_t> &script, int64_t amount) = 0;
     virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) = 0;
     virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock) = 0;
-    // Main Thread
+    // Thread Main
     virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock) = 0;
     virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) = 0;
 };
+
+}

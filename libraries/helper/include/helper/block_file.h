@@ -5,9 +5,10 @@
 #include <mutex>
 #include <deque>
 #include <thread>
-#include <chrono>
 #include <boost/filesystem.hpp>
 #include <bkbase/logging.h>
+
+namespace helper {
 
 constexpr uint8_t BLOCK_DISK_MAGIC[] = {0xF9, 0xBE, 0xB4, 0xD9};
 
@@ -74,3 +75,5 @@ public:
         return false;
     }
 };
+
+}

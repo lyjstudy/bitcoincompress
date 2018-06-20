@@ -7,7 +7,7 @@ add_library(script
 )
 
 target_link_libraries(script core)
-target_include_directories(script PUBLIC core include)
+target_include_directories(script PUBLIC include)
 
 # script unit tests
 if (BITCOINKEYS_BUILD_TESTS)

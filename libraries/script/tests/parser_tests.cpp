@@ -39,7 +39,9 @@ BOOST_AUTO_TEST_CASE(templa) {
             {
                 OP_RETURN, OP_16,
             },
-            {},
+            {
+                { 16 },
+            },
         },
         // NonStandard
         {
@@ -146,6 +148,9 @@ BOOST_AUTO_TEST_CASE(templa) {
             },
             {
                 {
+                    2,
+                },
+                {
                     0, 0, 0, 0,  0, 0, 0, 0,   0, 0, 0, 0,  0, 0, 0, 0,
                     0, 0, 0, 0,  0, 0, 0, 0,   0, 0, 0, 0,  0, 0, 0, 0,
                     0,
@@ -160,6 +165,35 @@ BOOST_AUTO_TEST_CASE(templa) {
                     0, 0, 0, 0,  0, 0, 0, 0,   0, 0, 0, 0,  0, 0, 0, 0,
                     2,
                 },
+                {
+                    3,
+                },
+            },
+        },
+        // NonStandard
+        {
+            script::Type::NonStandard,
+            {
+                OP_0,
+            },
+            {
+                OP_0,
+            },
+            {
+                {},
+            },
+        },
+        // NonStandard
+        {
+            script::Type::NonStandard,
+            {
+                OP_2,
+            },
+            {
+                OP_2,
+            },
+            {
+                { 2 },
             },
         },
     };
@@ -179,8 +213,6 @@ BOOST_AUTO_TEST_CASE(templa) {
         BOOST_CHECK(CompareVector(outData, data));
 
         BOOST_CHECK_EQUAL((int)script::GetOutputType(script), (int)testData[i].type);
-
-        // printf("%s\n", GetOpString(testData[i].script).c_str());
     }
 
 

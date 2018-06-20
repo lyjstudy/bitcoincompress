@@ -5,7 +5,7 @@ add_library(core
 )
 
 target_link_libraries(core bkbase)
-target_include_directories(core PUBLIC bkbase include)
+target_include_directories(core PUBLIC include)
 
 # core unit tests
 if (BITCOINKEYS_BUILD_TESTS)
