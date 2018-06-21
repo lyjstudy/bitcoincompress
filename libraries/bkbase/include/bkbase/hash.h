@@ -88,6 +88,11 @@ public:
         memset(mDataPtr, 0, Size());
         HexToReverseBin(psz, mDataPtr, Size());
     }
+    void SetHex(const char *psz) {
+        if (mDataPtr == nullptr) mDataPtr = allocator.allocate(Size());
+        memset(mDataPtr, 0, Size());
+        HexToBin(psz, mDataPtr, Size());
+    }
     void SetData(const std::vector<uint8_t> &data) {
         if (mDataPtr == nullptr) mDataPtr = allocator.allocate(Size());
         memset(mDataPtr, 0, Size());
@@ -139,9 +144,10 @@ public:
         }
     }
 
-    static HashBase<BITS, Allocator> From(const char *str) {
-        HashBase<BITS, Allocator> rv;
-        rv.SetHex(str);
+    template<typename T>
+    static T From(const char *str) {
+        T rv;
+        rv.SetReverseHex(str);
         return rv;
     }
 

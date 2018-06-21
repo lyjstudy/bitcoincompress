@@ -33,7 +33,7 @@ class OutputPool {
 protected:
     class Pool {
     protected:
-        std::unordered_map<OutputKey, std::vector<uint8_t>, bkbase::HashOperator> mPending;
+        std::unordered_map<OutputKey, std::pair<std::vector<uint8_t>, int64_t>, bkbase::HashOperator> mPending;
         std::mutex mMutex;
         std::string mName;
         size_t mCurrent;
@@ -41,21 +41,22 @@ protected:
         Pool(const std::string &name) : mName(name), mCurrent(0) {
 
         }
-        bool ErasePending(const OutputKey &key, std::vector<uint8_t> &script) {
+        bool ErasePending(const OutputKey &key, std::vector<uint8_t> &script, int64_t &amount) {
             std::lock_guard<std::mutex> gurad(mMutex);
             auto finded = mPending.find(key);
             if (finded == mPending.end()) {
                 return false;
             }
-            script = std::move(finded->second);
+            script = std::move(finded->second.first);
+            amount = finded->second.second;
             mPending.erase(finded);
             return true;
         }
-        void AddPending(const OutputKey &key, const std::vector<uint8_t> &script) {
+        void AddPending(const OutputKey &key, const std::vector<uint8_t> &script, int64_t amount) {
             size_t dumpPending = 0;
             {
                 std::lock_guard<std::mutex> gurad(mMutex);
-                mPending.insert(std::make_pair(key, script));
+                mPending.insert(std::make_pair(key, std::make_pair(script, amount)));
                 if (mPending.size() > mCurrent && (mPending.size() % 50000) == 0) {
                     mCurrent = mPending.size();
                     dumpPending = mCurrent;
@@ -65,7 +66,7 @@ protected:
                 BKINFO() << mName << ": " << dumpPending;
             }
         }
-        std::unordered_map<OutputKey, std::vector<uint8_t>, bkbase::HashOperator> &Data() {
+        std::unordered_map<OutputKey, std::pair<std::vector<uint8_t>, int64_t>, bkbase::HashOperator> &Data() {
             return mPending;
         }
     };
@@ -79,41 +80,45 @@ public:
         {
             OutputKey key(txid, index);
             std::vector<uint8_t> unlockScript;
-            if (!mInputs.ErasePending(key, unlockScript)) {
-                mOutputs.AddPending(key, script);
+            int64_t ignore;
+            if (!mInputs.ErasePending(key, unlockScript, ignore)) {
+                mOutputs.AddPending(key, script, amount);
             } else {
-                OnTransaction(txid, index, script, unlockScript);
+                OnTransaction(txid, index, script, unlockScript, amount);
             }
         } else {
-            OnOutputUnspendable(txid, index, script);
+            OnOutputUnspendable(txid, index, script, amount);
         }
     }
     void AddInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &script) {
         OutputKey key(txid, index);
         std::vector<uint8_t> lockScript;
-        if (!mOutputs.ErasePending(key, lockScript)) {
-            mInputs.AddPending(key, script);
+        int64_t amount;
+        if (!mOutputs.ErasePending(key, lockScript, amount)) {
+            mInputs.AddPending(key, script, 0);
         } else {
-            OnTransaction(txid, index, lockScript, script);
+            OnTransaction(txid, index, lockScript, script, amount);
         }
     }
     void End() {
         for (auto i = mInputs.Data().begin(); i != mInputs.Data().end(); ++i) {
-            OnInput(i->first.TxID(), i->first.TxIndex(), i->second);
+            OnInput(i->first.TxID(), i->first.TxIndex(), i->second.first, i->second.second);
         }
         mInputs.Data().clear();
         for (auto i = mOutputs.Data().begin(); i != mOutputs.Data().end(); ++i) {
-            OnOutput(i->first.TxID(), i->first.TxIndex(), i->second);
+            OnOutput(i->first.TxID(), i->first.TxIndex(), i->second.first, i->second.second);
         }
         mOutputs.Data().clear();
     }
     // Thread Any
+    virtual void OnBlockStart(const core::Block &blk) {}
+    virtual void OnTransactionStart(const core::Transaction &tx, const bkbase::Hash256 &txid) {}
     virtual bool IsUnspendable(const std::vector<uint8_t> &script, int64_t amount) = 0;
-    virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) = 0;
-    virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock) = 0;
+    virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) = 0;
+    virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock, int64_t amount) = 0;
     // Thread Main
-    virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock) = 0;
-    virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) = 0;
+    virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock, int64_t amount) = 0;
+    virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) = 0;
 };
 
 }

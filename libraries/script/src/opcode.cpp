@@ -17,6 +17,7 @@ std::string GetOpString(const std::vector<uint8_t> &codes) {
         } else {	
             snprintf(buffer, sizeof(buffer), "%s ", GetOpName(op));	
         }	
+        if (!strCodes.empty()) strCodes += "\n";
         strCodes += buffer;	
     }	
 	

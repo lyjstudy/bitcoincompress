@@ -103,12 +103,12 @@ namespace script {
     Type GetOutputType(const std::vector<uint8_t> &script, std::vector<std::vector<uint8_t>> *addrs) {
         if (addrs != nullptr) addrs->clear();
 
-        if (script.empty()) return Type::BadScript;
+        if (script.empty()) return Type::NonStandard;
         std::vector<uint8_t> scriptTemplate;
         std::vector<std::vector<uint8_t>> stack;
         if (script::Parser::GetTemplate(script, scriptTemplate, &stack) != 0)
             return Type::BadScript;
-        if (scriptTemplate.empty()) return Type::BadScript;
+        if (scriptTemplate.empty()) return Type::NonStandard;
 
         uint8_t op = scriptTemplate[0];
 

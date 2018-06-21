@@ -196,6 +196,19 @@ BOOST_AUTO_TEST_CASE(templa) {
                 { 2 },
             },
         },
+        // NonStandard
+        {
+            script::Type::NonStandard,
+            {
+                OP_1NEGATE,
+            },
+            {
+                OP_1NEGATE,
+            },
+            {
+                { 0x81 },
+            },
+        },
     };
     
     for (size_t i = 0; i < sizeof(testData) / sizeof(testData[0]); i++) {

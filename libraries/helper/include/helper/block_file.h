@@ -13,7 +13,7 @@ namespace helper {
 constexpr uint8_t BLOCK_DISK_MAGIC[] = {0xF9, 0xBE, 0xB4, 0xD9};
 
 class BlockLoader {
-    static const size_t MAX_BUF_COUNT = 7;
+    static const size_t MAX_BUF_COUNT = 4;
 protected:
     boost::filesystem::path mDirectory;
     int mFileNumber;

@@ -50,10 +50,12 @@ ScanFast::ScanFast(const char *path, OutputPool *pool)
 {}
 
 void ScanFast::OnBlock(core::Block &blk) {
+    mPool->OnBlockStart(blk);
     auto &txs = blk.Transactions();
     for (auto txIter = txs.begin(); txIter != txs.end(); ++txIter) {
         auto tx = *txIter;
         bkbase::Hash256 txHash = tx->CalcHash();
+        mPool->OnTransactionStart(*tx, txHash);
         auto &outputs = tx->Outputs();
         for (size_t i = 0; i < outputs.size(); i++) {
             mPool->AddOutput(txHash, (uint16_t)i, outputs[i].LockScript(), outputs[i].Amount());

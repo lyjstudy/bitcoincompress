@@ -5,42 +5,40 @@
 
 namespace compress {
 
-    std::vector<uint8_t> PubKey::Compress(const uint8_t *pubkey, size_t size) {
+    bool PubKey::Compress(const uint8_t *pubkey, size_t size, std::vector<uint8_t> &result) {
         
         if (size != 65 || pubkey[0] != 0x04) {
-            BKERROR() << "Invalid pubkey size:" << size
-                         << " or first:" << (size > 0 ? (int)pubkey[0] : -1);
-            return std::vector<uint8_t>(pubkey, pubkey + size);
+            return false;
         }
 
-        std::vector<uint8_t> ret(pubkey, pubkey + 33);
-        ret[0] |= (pubkey[64] & 0x01);
-        ret[0] -= 2;
+        result.clear();
+        result.insert(result.begin(), pubkey, pubkey + 33);
+        result[0] |= (pubkey[64] & 0x01);
+        result[0] -= 2;
 
-        return ret;
+        return true;
     }
 
-    std::vector<uint8_t> PubKey::Decompress(const uint8_t *pubkey, size_t size) {
+    bool PubKey::Decompress(const uint8_t *pubkey, size_t size, std::vector<uint8_t> &result) {
         
         if (size != 33) {
-            BKERROR() << "Invalid pubkey size:" << size;
-            return std::vector<uint8_t>(pubkey, pubkey + size);
+            return false;
         }
 
-        std::vector<uint8_t> ret(pubkey, pubkey + 33);
+        result.clear();
+        result.insert(result.begin(), pubkey, pubkey + 33);
 
         secp256k1_pubkey secppubkey;
-        if (!secp256k1_ec_pubkey_parse(crypto::Secp256k1, &secppubkey, &ret[0], ret.size())) {
-            BKERROR() << "secp256k1_ec_pubkey_parse failure";
-            return std::vector<uint8_t>(pubkey, pubkey + size);
+        if (!secp256k1_ec_pubkey_parse(crypto::Secp256k1, &secppubkey, &result[0], result.size())) {
+            return false;
         }
 
-        ret.resize(65);
+        result.resize(65);
         size_t publen = 65;
-        secp256k1_ec_pubkey_serialize(crypto::Secp256k1, &ret[0], &publen, &secppubkey, SECP256K1_EC_UNCOMPRESSED);
+        secp256k1_ec_pubkey_serialize(crypto::Secp256k1, &result[0], &publen, &secppubkey, SECP256K1_EC_UNCOMPRESSED);
 
-        ret.resize(publen);
+        result.resize(publen);
 
-        return ret;
+        return true;
     }
 }

@@ -69,6 +69,12 @@ public:
         : mTxInID(other.mTxInID), mTxInIndex(other.mTxInIndex)
         , mUnlockScript(other.mUnlockScript), mSequence(other.mSequence)
     {}
+    TransactionInput(const bkbase::Hash256 &txid, uint32_t index, const std::vector<uint8_t> &script)
+        : mTxInID(txid), mTxInIndex(index), mUnlockScript(script), mSequence(SEQUENCE_FINAL)
+    {}
+    TransactionInput(bkbase::Hash256 &&txid, uint32_t index, std::vector<uint8_t> &&script)
+        : mTxInID(txid), mTxInIndex(index), mUnlockScript(script), mSequence(SEQUENCE_FINAL)
+    {}
     inline const bkbase::Hash256 &TxInID() const {
         return mTxInID;
     }
@@ -100,6 +106,12 @@ public:
     {}
     TransactionOutput(TransactionOutput &&other)
         : mAmount(other.mAmount), mLockScript(other.mLockScript)
+    {}
+    TransactionOutput(int64_t amount, const std::vector<uint8_t> &script)
+        : mAmount(amount), mLockScript(script)
+    {}
+    TransactionOutput(int64_t amount, std::vector<uint8_t> &&script)
+        : mAmount(amount), mLockScript(script)
     {}
     inline int64_t Amount() const {
         return mAmount;
@@ -146,6 +158,18 @@ public:
         : mVersion(other.mVersion), mInputs(other.mInputs)
         , mOutputs(other.mOutputs), mLockTime(other.mLockTime)
     {}
+    inline void AddInput(const TransactionInput &input) {
+        mInputs.push_back(input);
+    }
+    inline void AddInput(TransactionInput &&input) {
+        mInputs.push_back(input);
+    }
+    inline void AddOutput(const TransactionOutput &output) {
+        mOutputs.push_back(output);
+    }
+    inline void AddOutput(TransactionOutput &&output) {
+        mOutputs.push_back(output);
+    }
     inline int32_t Version() const {
         return mVersion;
     }

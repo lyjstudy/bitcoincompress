@@ -19,9 +19,11 @@ BOOST_AUTO_TEST_CASE(base) {
         printf("pubkey: %s\n", goodPubkey[i].c_str());
         auto pubkey = bkbase::HexToBin(goodPubkey[i]);
 
-        auto compress = PubKey::Compress(pubkey);
+        std::vector<uint8_t> compress;
+        BOOST_CHECK(PubKey::Compress(pubkey, compress));
         printf("comress: %s\n", bkbase::HexFromBin(compress).c_str());
-        auto uncompress = PubKey::Decompress(compress);
+        std::vector<uint8_t> uncompress;
+        BOOST_CHECK(PubKey::Decompress(compress, uncompress));
         printf("uncompress: %s\n", bkbase::HexFromBin(uncompress).c_str());
 
         BOOST_CHECK(compress.size() < uncompress.size());

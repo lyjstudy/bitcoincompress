@@ -107,10 +107,10 @@ public:
     virtual bool IsUnspendable(const std::vector<uint8_t> &script, int64_t amount) {
         return !script.empty() && script[0] == OP_RETURN;
     }
-    virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) {
+    virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) {
         SCAN_STAT_ADD(Unspendable, lock.size());
     }
-    virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock) {
+    virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock, int64_t amount) {
         std::vector<std::vector<uint8_t>> address;
         auto type = script::GetOutputType(lock, &address);
         auto scriptSize = lock.size() + unlock.size();
@@ -173,10 +173,10 @@ public:
         }
     }
     // Main Thread
-    virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock) {
+    virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock, int64_t amount) {
         SCAN_STAT_ADD(BadInput, unlock.size());
     }
-    virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock) {
+    virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) {
         std::vector<std::vector<uint8_t>> address;
         auto type = script::GetOutputType(lock, &address);
         switch (type) {

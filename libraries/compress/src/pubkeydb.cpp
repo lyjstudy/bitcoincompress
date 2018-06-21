@@ -66,27 +66,29 @@ namespace compress {
         bool isCompressed = false;
         if (size == 65) {
             memcpy(uncompress, pubkey, 65);
-            auto vcompress = PubKey::Compress(uncompress, 65);
+            std::vector<uint8_t> vcompress;
+            if (!PubKey::Compress(uncompress, 65, vcompress)) return INVALID_INDEX;
             if (vcompress.size() != 33) return INVALID_INDEX;
             memcpy(compress, &vcompress[0], 33);
+            // test
+            std::vector<uint8_t> vuncompress;
+            if (!PubKey::Decompress(compress, 33, vuncompress)) return INVALID_INDEX;
+            if (vuncompress.size() != 65) return INVALID_INDEX;
+            if (memcmp(&vuncompress[0], uncompress, 65) != 0) return INVALID_INDEX;
         } else if (size == 33) {
             isCompressed = true;
             memcpy(compress, pubkey, 33);
-            auto vuncompress = PubKey::Decompress(compress, 33);
+            std::vector<uint8_t> vuncompress;
+            if (!PubKey::Decompress(compress, 33, vuncompress)) return INVALID_INDEX;
             if (vuncompress.size() != 65) return INVALID_INDEX;
             memcpy(uncompress, &vuncompress[0], 65);
         } else {
             return INVALID_INDEX;
         }
+
         bkbase::Hash160 compressHash = crypto::CHash160().Write(compress, sizeof(compress)).Finalize();
         bkbase::Hash160 uncompressHash = crypto::CHash160().Write(uncompress, sizeof(uncompress)).Finalize();
 
-/*
-        leveldb::Slice keyCompress((char *)compress, sizeof(compress));
-        leveldb::Slice keyUncompress((char *)uncompress, sizeof(uncompress));
-        leveldb::Slice keyCompressHash((char *)compressHash.begin(), compressHash.size());
-        leveldb::Slice keyUncompressHash((char *)uncompressHash.begin(), uncompressHash.size());
-*/
         leveldb::Slice keys[4] = {
             leveldb::Slice((char *)compress, sizeof(compress)),
             leveldb::Slice((char *)uncompress, sizeof(uncompress)),
@@ -94,19 +96,6 @@ namespace compress {
             leveldb::Slice((char *)uncompressHash.begin(), uncompressHash.size()),
         };
 
-#if 1
-        BKWARN() << "Duplicate Checking";
-        std::string result;
-        for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
-            result.clear();
-            auto status = mDB->Get(leveldb::ReadOptions(), keys[i], &result);
-            if (!status.IsNotFound()) {
-                BKCRITICAL() << bkbase::HexFromBin((uint8_t *)keys[i].data(), keys[i].size())
-                    << ":" << bkbase::HexFromBin((uint8_t *)result.c_str(), result.size())
-                    << " Duplicated";
-            }
-        }
-#endif
         uint64_t curIndex = mCount++;
 
         leveldb::Slice values[4] = {
@@ -137,12 +126,9 @@ namespace compress {
 
         auto status = mDB->Get(leveldb::ReadOptions(), key, &result);
         if (!status.ok()) {
-            BKINFO() << bkbase::HexFromBin(data, size) << ": " << status.ToString();
             return INVALID_INDEX;
         }
         if (result.size() != sizeof(uint64_t)) {
-            BKERROR() << bkbase::HexFromBin(data, size) << ": " 
-                << bkbase::HexFromBin((uint8_t*)result.c_str(), result.size());
             return INVALID_INDEX;
         }
 
@@ -163,7 +149,7 @@ namespace compress {
                 break;
         }
 
-        BKERROR() << bkbase::HexFromBin(data, size) << " guess:" << (int)guessType << " real:" << (int)dbGetType(result);
+        // BKERROR() << bkbase::HexFromBin(data, size) << " guess:" << (int)guessType << " real:" << (int)dbGetType(result);
 
         return INVALID_INDEX;
     }
