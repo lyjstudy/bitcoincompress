@@ -34,4 +34,14 @@ template <typename T> inline T *NCONST_PTR(const T *val) {
 
 #define READWRITE(obj) ::bkbase::SerReadWrite(s, (obj), serAction)
 
+#define READWRITEVARINT(intval) { \
+    ::bkbase::VarInt<decltype(intval)> val(intval); \
+    ::bkbase::SerReadWrite(s, (val), serAction); \
+}
+
+#define READWRITECOMPACT(intval) { \
+    ::bkbase::CompactSize<decltype(intval)> val(intval); \
+    ::bkbase::SerReadWrite(s, (val), serAction); \
+}
+
 } // bkbase

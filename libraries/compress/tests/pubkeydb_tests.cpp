@@ -22,6 +22,10 @@ BOOST_AUTO_TEST_CASE(base) {
 
     auto pubkeyIndex = db.Add(pubkey);
     BOOST_CHECK(pubkeyIndex != INVALID_INDEX);
+
+    // db.Close();
+    // BOOST_CHECK(db.Open(tempDB.string().c_str()));
+
     BOOST_CHECK(db.Find(pubkeyhash) != INVALID_INDEX);
 }
 

@@ -21,6 +21,20 @@ void Machine::SetScript(std::vector<uint8_t> &&program, bool clearStack) {
     mParser.Reset(program);
 }
 
+ExecuteError Machine::Continue() {
+    if (mError != ExecuteError::Success)
+        return mError;
+
+    do {
+        Step();
+    } while (mError == ExecuteError::Success);
+
+    if (mError == ExecuteError::ReachEnd)
+        mError = ExecuteError::Success;
+    
+    return mError;
+}
+
 ExecuteError Machine::Step() {
     if (mError != ExecuteError::Success)
         return mError;
@@ -38,7 +52,9 @@ ExecuteError Machine::Step() {
     }
 
     try {
-        
+        if (opcode >= OP_IF && opcode <= OP_ENDIF) {
+            // Condition
+        }
     } catch (bkbase::Exception &ex) {
         BKERROR() << boost::diagnostic_information(ex);
         if (boost::get_error_info<script_execute_error>(ex)) {

@@ -5,6 +5,6 @@ add_executable(blockscan
 )
 
 
-target_link_libraries(blockscan bkbase core script helper)
+target_link_libraries(blockscan bkbase core script compress helper)
 
 target_include_directories(blockscan PUBLIC include)

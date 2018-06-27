@@ -5,7 +5,7 @@ namespace bkbase
     
 constexpr uint64_t COMPACT_SIZE_MAX = 0x02000000;
 
-template<typename T>
+template<typename T, typename = std::enable_if<std::is_unsigned<T>::value>>
 class CompactSize {
 protected:
     T &mNumber;

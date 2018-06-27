@@ -6,6 +6,7 @@
 #include <thread>
 #include <unordered_set>
 #include <helper/statistics_pool.h>
+#include "pubkey_pool.h"
 
 
 int main(int argc, char *argv[]) {
@@ -13,8 +14,8 @@ int main(int argc, char *argv[]) {
     bkbase::LoggingThreadName("main");
     BKLOGSCOPE("entry");
 
-    helper::StatisticsPool pool;
-    helper::ScanOrder scan("/home/liuyujun/.bitcoin/blocks", &pool);
+    PubKeyPool pool("/home/liuyujun/test/pubkeydb");
+    helper::ScanFast scan("/home/liuyujun/.bitcoin/blocks", &pool);
     scan.Start();
 
     return 0;

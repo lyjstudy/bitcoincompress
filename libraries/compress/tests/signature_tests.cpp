@@ -18,15 +18,12 @@ BOOST_AUTO_TEST_CASE(base) {
 
     for (size_t i = 0; i < sizeof(goodSigs) / sizeof(goodSigs[0]); i++) {
 
-        printf("sig: %s\n", goodSigs[i].c_str());
         auto sig = bkbase::HexToBin(goodSigs[i]);
 
         BOOST_CHECK(Signature::IsSupport(sig));
 
         auto compress = Signature::Compress(sig);
-        printf("comress: %s\n", bkbase::HexFromBin(compress).c_str());
         auto uncompress = Signature::Decompress(compress);
-        printf("uncompress: %s\n", bkbase::HexFromBin(uncompress).c_str());
 
         BOOST_CHECK(compress.size() < uncompress.size());
         BOOST_CHECK_EQUAL(bkbase::HexFromBin(sig), bkbase::HexFromBin(uncompress));

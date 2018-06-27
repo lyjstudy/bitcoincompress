@@ -4,22 +4,6 @@
 
 namespace compress {
 
-#define LEVELDB_NO_RETURN
-#define LEVELDB_RETURN_FALSE Close(); return false
-#define LEVELDB_NOT_FOUND_FALSE if (!status.IsNotFound()) { Close(); return false; }
-
-#define __LEVELDB_CHECK_CALL(api, ret, ...) { \
-    auto status = api(__VA_ARGS__); \
-    if (!status.ok()) { \
-        BKERROR() << #api << "(" << #__VA_ARGS__ << "): " << status.ToString(); \
-        ret; \
-    } \
-}
-
-#define LEVELDB_CHECK_CALL(api, ...) __LEVELDB_CHECK_CALL(api, LEVELDB_RETURN_FALSE, __VA_ARGS__)
-#define LEVELDB_CHECK_CALL_VOID(api, ...) __LEVELDB_CHECK_CALL(api, LEVELDB_NO_RETURN, __VA_ARGS__)
-#define LEVELDB_CHECK_CALL_NOT_FOUND(api, ...) __LEVELDB_CHECK_CALL(api, LEVELDB_NOT_FOUND_FALSE, __VA_ARGS__)
-
     PubKeyDB::PubKeyDB()
         : mDB(nullptr), mCount(0)
     {}
@@ -33,17 +17,30 @@ namespace compress {
 
         leveldb::Options options;
         options.create_if_missing = true;
-        LEVELDB_CHECK_CALL(leveldb::DB::Open, options, db, &mDB);
+        auto status = leveldb::DB::Open(options, db, &mDB);
+        if (!status.ok()) {
+            BKERROR() << "leveldb::DB::Open" << "(" << db << "): " << status.ToString();
+            return false;
+        }
 
         std::string result;
-        LEVELDB_CHECK_CALL_NOT_FOUND(mDB->Get, leveldb::ReadOptions(), getCountKey(), &result);
-
+        status = mDB->Get(leveldb::ReadOptions(), getCountKey(), &result);
+        if (!status.ok()) {
+            if (!status.IsNotFound()) {
+                BKERROR() << "leveldb::DB::Get(K): " << status.ToString();
+                Close();
+                return false;
+            }
+            return true;
+        }
 
         if (result.size() != sizeof(uint64_t)) {
             mCount = 0;
         } else {
             mCount = bkbase::ReadLE<uint64_t>(result.c_str());
         }
+
+        BKINFO() << "PubKeyDB Count: " << mCount;
 
         return true;
     }
@@ -53,7 +50,10 @@ namespace compress {
             char keyBuf[sizeof(uint64_t)];
             bkbase::WriteLE<uint64_t>(keyBuf, mCount);
             leveldb::Slice value(keyBuf, sizeof(uint64_t));
-            LEVELDB_CHECK_CALL_VOID(mDB->Put, leveldb::WriteOptions(), getCountKey(), value);
+            auto status = mDB->Put(leveldb::WriteOptions(), getCountKey(), value);
+            if (!status.ok()) {
+                BKERROR() << "leveldb::DB::Put(K): " << status.ToString();
+            }
             delete mDB;
             mDB = nullptr;
         }
@@ -98,6 +98,10 @@ namespace compress {
 
         uint64_t curIndex = mCount++;
 
+        if (curIndex % 100000 == 0) {
+            BKINFO() << "Pubkey: " << curIndex;
+        }
+
         leveldb::Slice values[4] = {
             dbMakeValue(curIndex, Type::Compress),
             dbMakeValue(curIndex, Type::Uncompress),
@@ -106,7 +110,10 @@ namespace compress {
         };
         
         for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
-            LEVELDB_CHECK_CALL_VOID(mDB->Put, leveldb::WriteOptions(), keys[i], values[i]);
+            auto status = mDB->Put(leveldb::WriteOptions(), keys[i], values[i]);
+            if (!status.ok()) {
+                BKERROR() << "leveldb::DB::Write" << "(" << curIndex << "," << i << "): " << status.ToString();
+            }
         }
 
         return bkbase::ReadLE<uint64_t>(values[isCompressed ? 0 : 1].data());

@@ -4,6 +4,7 @@
 #include <bkbase/logging.h>
 #include <unordered_map>
 #include <mutex>
+#include <script/opcode.h>
 
 namespace helper {
 
@@ -113,12 +114,14 @@ public:
     // Thread Any
     virtual void OnBlockStart(const core::Block &blk) {}
     virtual void OnTransactionStart(const core::Transaction &tx, const bkbase::Hash256 &txid) {}
-    virtual bool IsUnspendable(const std::vector<uint8_t> &script, int64_t amount) = 0;
-    virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) = 0;
-    virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock, int64_t amount) = 0;
+    virtual bool IsUnspendable(const std::vector<uint8_t> &script, int64_t amount) {
+        return !script.empty() && script[0] == OP_RETURN;
+    }
+    virtual void OnOutputUnspendable(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) {}
+    virtual void OnTransaction(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, const std::vector<uint8_t> &unlock, int64_t amount) {}
     // Thread Main
-    virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock, int64_t amount) = 0;
-    virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) = 0;
+    virtual void OnInput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &unlock, int64_t amount) {}
+    virtual void OnOutput(const bkbase::Hash256 &txid, uint16_t index, const std::vector<uint8_t> &lock, int64_t amount) {}
 };
 
 }

@@ -3,9 +3,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 #include <bkbase/logging.h>
 #include <bkbase/serialize.h>
 #include <bkbase/hash.h>
+#include <atomic>
 
 namespace compress {
 
@@ -22,7 +24,7 @@ namespace compress {
         };
     protected:
         leveldb::DB* mDB;
-        uint64_t mCount;
+        std::atomic<uint64_t> mCount;
 
         inline static leveldb::Slice getCountKey() {
             return "K";
@@ -55,6 +57,14 @@ namespace compress {
         inline uint64_t Find(const std::vector<uint8_t> &data) {
             if (data.empty()) return INVALID_INDEX;
             return Find(&data[0], data.size());
+        }
+
+        inline bool Exists(const uint8_t *data, size_t size) {
+            return Find(data, size) != INVALID_INDEX;
+        }
+        inline bool Exists(const std::vector<uint8_t> &data) {
+            if (data.empty()) return false;
+            return Exists(&data[0], data.size());
         }
     };
 

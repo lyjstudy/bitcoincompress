@@ -16,20 +16,26 @@ BOOST_AUTO_TEST_CASE(base) {
 
     for (size_t i = 0; i < sizeof(goodPubkey) / sizeof(goodPubkey[0]); i++) {
 
-        printf("pubkey: %s\n", goodPubkey[i].c_str());
         auto pubkey = bkbase::HexToBin(goodPubkey[i]);
 
         std::vector<uint8_t> compress;
         BOOST_CHECK(PubKey::Compress(pubkey, compress));
-        printf("comress: %s\n", bkbase::HexFromBin(compress).c_str());
         std::vector<uint8_t> uncompress;
         BOOST_CHECK(PubKey::Decompress(compress, uncompress));
-        printf("uncompress: %s\n", bkbase::HexFromBin(uncompress).c_str());
 
         BOOST_CHECK(compress.size() < uncompress.size());
         BOOST_CHECK_EQUAL(bkbase::HexFromBin(pubkey), bkbase::HexFromBin(uncompress));
 
     }
+
+    std::vector<uint8_t> data = bkbase::HexToBin("02118a7dfa0131348ea33b26090acd074cbb5f7ef46877a45afa25f8761a9620e7");
+    
+    std::vector<uint8_t> uncompress;
+    BOOST_CHECK(PubKey::Decompress(data, uncompress));
+    std::vector<uint8_t> compress;
+    BOOST_CHECK(PubKey::Compress(uncompress, compress));
+    BOOST_CHECK(compress.size() < uncompress.size());
+    BOOST_CHECK_EQUAL(bkbase::HexFromBin(compress), bkbase::HexFromBin(data));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

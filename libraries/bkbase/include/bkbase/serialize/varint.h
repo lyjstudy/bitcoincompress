@@ -3,7 +3,7 @@
 namespace bkbase
 {
 
-template<typename T>
+template<typename T, typename = std::enable_if<std::is_unsigned<T>::value>>
 class VarInt {
 protected:
     T &mNumber;
@@ -45,5 +45,16 @@ public:
         SerializeThrow("Unserialize VarInt failure");
     }
 };
+
+template<typename Stream, typename T>
+inline void WriteVarInt(Stream &ss, T value) {
+    ::bkbase::Serialize(ss, ::bkbase::VarInt<T>(value));
+}
+
+template<typename Stream, typename T>
+inline void ReadVarInt(Stream &ss, T &value) {
+    ::bkbase::VarInt<T> varint(value);
+    ::bkbase::Unserialize(ss, varint);
+}
 
 } // bkbase
