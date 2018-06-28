@@ -6,10 +6,8 @@
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
-using namespace bkbase;
-
 BOOST_AUTO_TEST_CASE(simple) {
-
+    printf("Hello\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

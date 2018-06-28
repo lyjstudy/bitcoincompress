@@ -5,7 +5,7 @@
 #include <crypto/hasher.h>
 #include "transaction.h"
 
-namespace core {
+namespace chain {
 
 class BlockHeader {
     ADD_SERIALIZE_METHODS;
@@ -107,4 +107,4 @@ public:
     }
 };
 
-}
+} // chain

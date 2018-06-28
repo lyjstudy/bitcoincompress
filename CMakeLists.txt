@@ -14,6 +14,7 @@ include(Initialize)
 
 option(BITCOINKEYS_BUILD_TESTS "Build BitcoinKeys's unit tests" ON)
 
+include(cotire)
 
 add_subdirectory(libraries)
 add_subdirectory(program)

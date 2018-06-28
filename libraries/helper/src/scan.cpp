@@ -14,7 +14,7 @@ void Scan::_ThreadProc(std::string name) {
 
     while (mLoader.NextBlock(blockBuffer)) {
         try {
-            core::Block block;
+            chain::Block block;
             bkbase::StreamVector stream(bkbase::SER_DISK, 0, blockBuffer);
             stream >> block;
             OnBlock(block);
@@ -49,7 +49,7 @@ ScanFast::ScanFast(const char *path, OutputPool *pool)
     : Scan(path), mPool(pool)
 {}
 
-void ScanFast::OnBlock(core::Block &blk) {
+void ScanFast::OnBlock(chain::Block &blk) {
     mPool->OnBlockStart(blk);
     auto &txs = blk.Transactions();
     for (auto txIter = txs.begin(); txIter != txs.end(); ++txIter) {
@@ -84,7 +84,7 @@ ScanOrder::~ScanOrder() {
     BKINFO() << "Scan count:" << mHeight << "  id:" << mLastBlock.GetReverseHex();
 }
 
-void ScanOrder::OnBlock(core::Block &blk) {
+void ScanOrder::OnBlock(chain::Block &blk) {
     if (blk.HashPrevBlock() != mLastBlock) {
         mPendingBlocks.insert(std::make_pair(
             blk.HashPrevBlock(),

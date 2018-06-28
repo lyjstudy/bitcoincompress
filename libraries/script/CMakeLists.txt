@@ -6,8 +6,9 @@ add_library(script
     src/opcode.cpp
 )
 
-target_link_libraries(script core)
+target_link_libraries(script chain)
 target_include_directories(script PUBLIC include)
+cotire(script)
 
 # script unit tests
 if (BITCOINKEYS_BUILD_TESTS)

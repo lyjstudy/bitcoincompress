@@ -5,7 +5,7 @@
 #include <bkbase/hash.h>
 #include <crypto/hasher.h>
 
-namespace core {
+namespace chain {
 
 class TransactionInput {
     ADD_SERIALIZE_METHODS;
@@ -198,4 +198,4 @@ static inline TransactionRef MakeTransactionRef(Tx &&txIn) {
     return std::make_shared<const Transaction>(std::forward<Tx>(txIn));
 }
 
-}
+} // chain

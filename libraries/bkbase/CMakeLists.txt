@@ -5,11 +5,13 @@ add_library(bkbase
     src/hex.cpp
     src/logging.cpp
     src/hash.cpp
+    src/formats.cpp
     src/crypto/context.cpp
 )
 
 target_link_libraries(bkbase ${BKBASE_LIBRARIES})
 target_include_directories(bkbase PUBLIC ${BKBASE_INCLUDES} include)
+cotire(bkbase)
 
 # bkbase unit tests
 if (BITCOINKEYS_BUILD_TESTS)
@@ -21,6 +23,7 @@ if (BITCOINKEYS_BUILD_TESTS)
         tests/hex_tests.cpp
         tests/logging_tests.cpp
         tests/hash_tests.cpp
+        tests/formats_tests.cpp
     )
 endif (BITCOINKEYS_BUILD_TESTS)
 

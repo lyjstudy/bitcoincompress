@@ -14,4 +14,5 @@ function(bitcoinkeys_test_suite NAME)
 
 	target_include_directories(${EXECUTABLE} PUBLIC include)
 	target_link_libraries(${EXECUTABLE} ${NAME})
+	cotire(${EXECUTABLE})
 endfunction(bitcoinkeys_test_suite NAME)
