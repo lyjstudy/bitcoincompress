@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "serialize/core.h"
+#include "serialize/object.h"
 #include "serialize/numeric.h"
 #include "serialize/shared_ptr.h"
 #include "serialize/compact_size.h"

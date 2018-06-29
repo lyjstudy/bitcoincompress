@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <boost/endian/conversion.hpp>
 
 namespace bkbase {
 
@@ -69,11 +70,20 @@ public:
         return totalBits / 8;
     }
 
+    template<typename T>
+    inline std::string Encode(const T &value) {
+#ifdef BOOST_BIG_ENDIAN
+        return Encode((const uint8_t *)&value, sizeof(T));
+#else
+        T le = boost::endian::endian_reverse(value);
+        return Encode((const uint8_t *)&le, sizeof(T));
+#endif
+    }
+
     inline std::string Encode(const std::vector<uint8_t> &buffer) {
         if (buffer.empty()) return std::string();
         return Encode(&buffer[0], buffer.size());
     }
-
     std::string Encode(const uint8_t *buffer, size_t size) {
         std::string r;
         uint16_t value;
@@ -97,7 +107,11 @@ public:
             r.push_back((char)mByte2Char[(uint8_t)value]);
         }
         std::reverse(r.begin(), r.end());
-        return r;
+        return std::move(r);
+    }
+
+    bool Decode(const std::string &value, uint8_t *buffer, size_t outSize) {
+        return true;
     }
 };
 
@@ -109,6 +123,7 @@ extern DigitFormatsFast<1> Digit2;
 extern DigitFormatsFast<3> Digit8;
 extern DigitFormats Digit10;
 extern DigitFormatsFast<4> Digit16;
+extern DigitFormatsFast<5> Digit32;
 extern DigitFormats Digit58;
 extern DigitFormatsFast<6> Digit64;
 
